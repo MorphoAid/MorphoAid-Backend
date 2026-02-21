@@ -112,4 +112,26 @@ public class AuthController {
                 .user(summary)
                 .build();
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserSummary> getCurrentUser(java.security.Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userRepository.findByEmail(principal.getName())
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        UserSummary summary = UserSummary.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+
+        return ResponseEntity.ok(summary);
+    }
 }

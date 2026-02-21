@@ -6,6 +6,7 @@ import com.morphoaid.backend.dto.LoginRequest;
 import com.morphoaid.backend.dto.RegisterRequest;
 import com.morphoaid.backend.entity.InvitationToken;
 import com.morphoaid.backend.entity.Role;
+import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.repository.InvitationTokenRepository;
 import com.morphoaid.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,5 +130,27 @@ public class AuthControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists());
+    }
+
+    @Test
+    @org.springframework.security.test.context.support.WithMockUser(username = "loginuser@example.com", roles = "DATA_USE")
+    void testGetMe_Authenticated_Success() throws Exception {
+        User targetUser = User.builder()
+                .email("loginuser@example.com")
+                .password("password123")
+                .role(Role.DATA_USE)
+                .build();
+        userRepository.save(targetUser);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("loginuser@example.com"))
+                .andExpect(jsonPath("$.role").value("DATA_USE"));
+    }
+
+    @Test
+    void testGetMe_Unauthenticated_Unauthorized() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/auth/me"))
+                .andExpect(status().isForbidden());
     }
 }
