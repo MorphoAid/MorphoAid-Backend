@@ -46,13 +46,16 @@ public class DevDataSeeder implements CommandLineRunner {
                 if (userRepository.findByEmail(adminEmail).isEmpty()) {
                         User adminUser = User.builder()
                                         .email(adminEmail)
-                                        .password(passwordEncoder.encode("adminpass"))
+                                        .password(passwordEncoder.encode("Admin123!"))
                                         .role(Role.ADMIN)
                                         .fullName("MorphoAid Admin")
                                         .organization("MorphoAid")
                                         .build();
 
                         savedUser = userRepository.save(adminUser);
+
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DevDataSeeder.class);
+                        logger.info("Seeded admin: {} (password: Admin123!)", adminEmail);
                 } else {
                         savedUser = userRepository.findByEmail(adminEmail).get();
                 }
