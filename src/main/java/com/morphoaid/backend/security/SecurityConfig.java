@@ -16,6 +16,11 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
+    public org.springframework.security.crypto.password.PasswordEncoder passwordEncoder() {
+        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())

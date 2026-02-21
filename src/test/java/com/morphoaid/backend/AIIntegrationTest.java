@@ -90,7 +90,7 @@ public class AIIntegrationTest {
                 ]
                 """;
 
-        when(mockUltralyticsClient.predict(any(byte[].class), any(String.class), any()))
+        when(mockUltralyticsClient.predict(any(byte[].class), any(String.class)))
                 .thenReturn(mockResponseJson);
 
         // Act

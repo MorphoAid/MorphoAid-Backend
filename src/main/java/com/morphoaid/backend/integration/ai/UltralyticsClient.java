@@ -19,6 +19,8 @@ import java.time.Duration;
 @Service
 public class UltralyticsClient {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UltralyticsClient.class);
+
     private final RestTemplate restTemplate;
     private final UltralyticsProperties properties;
 
@@ -32,10 +34,13 @@ public class UltralyticsClient {
                 .build();
     }
 
-    public String predict(byte[] imageBytes, String filename, UltralyticsPredictRequest request) {
+    public String predict(byte[] imageBytes, String filename) {
         if (properties.getApiKey() == null || properties.getApiKey().trim().isEmpty()) {
             throw new UltralyticsException("Ultralytics API key is not configured.");
         }
+
+        logger.info("Calling Ultralytics with:\nmodel={}\nimgsz={}\nconf={}\niou={}",
+                properties.getModelUrl(), properties.getImgsz(), properties.getConf(), properties.getIou());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -51,14 +56,14 @@ public class UltralyticsClient {
         };
 
         body.add("file", imageResource);
-        if (request.model() != null)
-            body.add("model", request.model());
-        if (request.imgsz() != null)
-            body.add("imgsz", request.imgsz());
-        if (request.conf() != null)
-            body.add("conf", request.conf());
-        if (request.iou() != null)
-            body.add("iou", request.iou());
+        if (properties.getModelUrl() != null)
+            body.add("model", properties.getModelUrl());
+        if (properties.getImgsz() != null)
+            body.add("imgsz", properties.getImgsz());
+        if (properties.getConf() != null)
+            body.add("conf", properties.getConf());
+        if (properties.getIou() != null)
+            body.add("iou", properties.getIou());
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 

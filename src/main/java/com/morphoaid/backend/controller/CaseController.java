@@ -41,12 +41,20 @@ public class CaseController {
             return ResponseEntity.badRequest().build();
         }
 
-        // Generate dummy imagePath (no real file storage yet)
-        String dummyImagePath = "/storage/dummy/" + UUID.randomUUID() + "-" + image.getOriginalFilename();
-
         try {
+            // Save real image path temporarily for analyze demonstration
+            java.io.File destDir = new java.io.File(System.getProperty("user.dir"), "debug");
+            if (!destDir.exists())
+                destDir.mkdirs();
+
+            String safeFilename = UUID.randomUUID() + "-" + image.getOriginalFilename();
+            java.io.File destFile = new java.io.File(destDir, safeFilename);
+            image.transferTo(destFile);
+
+            String realImagePath = destFile.getAbsolutePath();
+
             // Call caseService.createCase (now returns DTO)
-            CaseResponse newCase = caseService.createCase(patientCode, dummyImagePath, technicianId, location,
+            CaseResponse newCase = caseService.createCase(patientCode, realImagePath, technicianId, location,
                     uploaderId);
 
             logger.info("Created new case with ID: {}", newCase.getId());
@@ -56,6 +64,7 @@ public class CaseController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
+            logger.error("Upload fail: ", e);
             return ResponseEntity.internalServerError().build();
         }
     }

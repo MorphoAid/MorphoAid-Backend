@@ -21,33 +21,49 @@ public class DevDataSeeder implements CommandLineRunner {
         private final UserRepository userRepository;
         private final CaseRepository caseRepository;
         private final AIResultRepository aiResultRepository;
+        private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
         @Autowired
         public DevDataSeeder(UserRepository userRepository, CaseRepository caseRepository,
-                        AIResultRepository aiResultRepository) {
+                        AIResultRepository aiResultRepository,
+                        org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
                 this.userRepository = userRepository;
                 this.caseRepository = caseRepository;
                 this.aiResultRepository = aiResultRepository;
+                this.passwordEncoder = passwordEncoder;
         }
 
         @Override
         public void run(String... args) throws Exception {
                 String adminEmail = "admin@test.com";
+                String dataUseEmail = "demo@morphoaid.com";
 
                 // 1. Seed User
                 User savedUser;
                 if (userRepository.findByEmail(adminEmail).isEmpty()) {
                         User adminUser = User.builder()
                                         .email(adminEmail)
-                                        .password("plainpass") // temp placeholder
+                                        .password(passwordEncoder.encode("adminpass"))
                                         .role(Role.ADMIN)
-                                        .fullName("Admin")
+                                        .fullName("MorphoAid Admin")
                                         .organization("MorphoAid")
                                         .build();
 
                         savedUser = userRepository.save(adminUser);
                 } else {
                         savedUser = userRepository.findByEmail(adminEmail).get();
+                }
+
+                if (userRepository.findByEmail(dataUseEmail).isEmpty()) {
+                        User dataUseUser = User.builder()
+                                        .email(dataUseEmail)
+                                        .password(passwordEncoder.encode("demopass"))
+                                        .role(Role.DATA_USE)
+                                        .fullName("Demo User")
+                                        .organization("MorphoAid Demo")
+                                        .build();
+
+                        userRepository.save(dataUseUser);
                 }
 
                 // 2. Seed Cases if empty
