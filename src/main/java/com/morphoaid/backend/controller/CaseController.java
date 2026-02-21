@@ -74,4 +74,20 @@ public class CaseController {
     public ResponseEntity<AIResultResponse> getAIResultByCaseId(@PathVariable Long id) {
         return ResponseEntity.ok(caseService.findAiResultByCaseId(id));
     }
+
+    @PostMapping("/{id}/analyze")
+    public ResponseEntity<AIResultResponse> analyzeCase(@PathVariable Long id) {
+        try {
+            AIResultResponse result = caseService.analyzeCase(id);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            logger.error("Analysis failed due to missing image: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (com.morphoaid.backend.exception.NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("AI Analysis failed for case {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(502).build(); // 502 Bad Gateway for upstream AI failure
+        }
+    }
 }

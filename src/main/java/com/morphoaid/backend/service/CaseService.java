@@ -9,10 +9,20 @@ import com.morphoaid.backend.exception.NotFoundException;
 import com.morphoaid.backend.repository.AIResultRepository;
 import com.morphoaid.backend.repository.CaseRepository;
 import com.morphoaid.backend.repository.UserRepository;
+import com.morphoaid.backend.entity.CaseStatus;
+import com.morphoaid.backend.integration.ai.UltralyticsClient;
+import com.morphoaid.backend.integration.ai.UltralyticsDetection;
+import com.morphoaid.backend.integration.ai.UltralyticsParser;
+import com.morphoaid.backend.integration.ai.UltralyticsPredictRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,13 +33,18 @@ public class CaseService {
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
     private final AIResultRepository aiResultRepository;
+    private final UltralyticsClient ultralyticsClient;
+    private final UltralyticsParser ultralyticsParser;
 
     @Autowired
     public CaseService(CaseRepository caseRepository, UserRepository userRepository,
-            AIResultRepository aiResultRepository) {
+            AIResultRepository aiResultRepository, UltralyticsClient ultralyticsClient,
+            UltralyticsParser ultralyticsParser) {
         this.caseRepository = caseRepository;
         this.userRepository = userRepository;
         this.aiResultRepository = aiResultRepository;
+        this.ultralyticsClient = ultralyticsClient;
+        this.ultralyticsParser = ultralyticsParser;
     }
 
     @Transactional
@@ -54,6 +69,57 @@ public class CaseService {
         return toCaseResponse(savedCase);
     }
 
+    @Transactional
+    public AIResultResponse analyzeCase(Long caseId) {
+        Case targetCase = caseRepository.findById(caseId)
+                .orElseThrow(() -> new NotFoundException("Case not found with id: " + caseId));
+
+        if (targetCase.getImagePath() == null || targetCase.getImagePath().isEmpty()) {
+            throw new IllegalArgumentException("Case does not have an associated image.");
+        }
+
+        byte[] imageBytes;
+        try {
+            Path path = Paths.get(targetCase.getImagePath());
+            imageBytes = Files.readAllBytes(path);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to read image file from path: " + targetCase.getImagePath(), e);
+        }
+
+        // Call the AI model
+        UltralyticsPredictRequest request = new UltralyticsPredictRequest("malaria-v1", 640, 0.25, 0.45);
+        String rawResponse = ultralyticsClient.predict(imageBytes, targetCase.getImagePath(), request);
+
+        // Parse + map the result
+        Optional<UltralyticsDetection> detectionOpt = ultralyticsParser.parseTopDetection(rawResponse);
+
+        AIResult aiResult = new AIResult();
+        aiResult.setCaseEntity(targetCase);
+        aiResult.setRawResponseJson(rawResponse);
+
+        if (detectionOpt.isPresent()) {
+            UltralyticsDetection detection = detectionOpt.get();
+            aiResult.setConfidence(detection.confidence());
+            aiResult.setDrugExposure(detection.drugExposure());
+            aiResult.setDrugType(detection.drugType());
+            aiResult.setParasiteStage(detection.parasiteStage());
+            aiResult.setTopClassId(detection.topClassId());
+        } else {
+            // No detections
+            aiResult.setConfidence(0.0);
+            aiResult.setDrugExposure(false);
+        }
+
+        // Save AI Result
+        aiResult = aiResultRepository.save(aiResult);
+
+        // Update Case status
+        targetCase.setStatus(CaseStatus.ANALYZED);
+        caseRepository.save(targetCase);
+
+        return toAIResultResponse(aiResult);
+    }
+
     public List<CaseResponse> getCases() {
         return caseRepository.findAllByOrderByIdDesc()
                 .stream()
@@ -72,7 +138,6 @@ public class CaseService {
     }
 
     public Optional<AIResultResponse> getAIResultByCaseId(Long caseId) {
-        // Find AIResult without AI integration logic yet
         return aiResultRepository.findByCaseEntityId(caseId).map(this::toAIResultResponse);
     }
 
@@ -101,6 +166,8 @@ public class CaseService {
                 .caseId(entity.getCaseEntity() != null ? entity.getCaseEntity().getId() : null)
                 .parasiteStage(entity.getParasiteStage())
                 .drugExposure(entity.getDrugExposure())
+                .drugType(entity.getDrugType())
+                .topClassId(entity.getTopClassId())
                 .confidence(entity.getConfidence())
                 .rawResponseJson(entity.getRawResponseJson())
                 .createdAt(entity.getCreatedAt())

@@ -32,6 +32,12 @@ public class AIResult {
     @Column(name = "drug_exposure")
     private Boolean drugExposure;
 
+    @Column(name = "drug_type")
+    private String drugType;
+
+    @Column(name = "top_class_id")
+    private Integer topClassId;
+
     @Column
     private Double confidence;
 
