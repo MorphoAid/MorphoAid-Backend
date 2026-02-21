@@ -21,13 +21,15 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final InvitationTokenService tokenService;
+    private final com.morphoaid.backend.security.JwtService jwtService;
 
     @Autowired
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            InvitationTokenService tokenService) {
+            InvitationTokenService tokenService, com.morphoaid.backend.security.JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -94,9 +96,9 @@ public class AuthController {
                 .build();
 
         return AuthResponse.builder()
-                .accessToken("dummy-jwt-token-replace-in-step4")
+                .accessToken(jwtService.generateToken(user))
                 .tokenType("Bearer")
-                .expiresIn(3600L)
+                .expiresIn(jwtService.getExpirationTime() / 1000)
                 .user(summary)
                 .build();
     }
