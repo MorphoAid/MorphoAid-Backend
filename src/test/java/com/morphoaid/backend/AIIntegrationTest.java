@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
@@ -78,8 +79,8 @@ public class AIIntegrationTest {
     }
 
     @Test
-    void testAnalyzeEndpoint_Success() {
-        // Arrange Mock JSON Model Response
+    @WithMockUser(roles = "DATA_PREP")
+    void testAnalyzeEndpoint_Success() throws Exception { // Arrange Mock JSON Model Response
         String mockResponseJson = """
                 [
                   {
