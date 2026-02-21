@@ -76,4 +76,47 @@ public class AdminUserControllerIntegrationTest {
                 .andExpect(status().isForbidden()); // Or 403 depending on filter setup, usually 403 if default auth
                                                     // checks fail
     }
+
+    @Test
+    @WithMockUser(username = "admin@test.com", roles = "ADMIN")
+    void testAdmin_CanUpdateUserRole() throws Exception {
+        User targetUser = userRepository.findByEmail("datause@test.com").get();
+
+        String updateJson = "{\"role\":\"DATA_PREP\"}";
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .patch("/admin/users/" + targetUser.getId())
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(updateJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("DATA_PREP"));
+
+        User updatedUser = userRepository.findById(targetUser.getId()).get();
+        org.junit.jupiter.api.Assertions.assertEquals(Role.DATA_PREP, updatedUser.getRole());
+    }
+
+    @Test
+    @WithMockUser(username = "datause@test.com", roles = "DATA_USE")
+    void testDataUse_CannotUpdateRole() throws Exception {
+        User targetUser = userRepository.findByEmail("admin@test.com").get();
+
+        String updateJson = "{\"role\":\"DATA_PREP\"}";
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .patch("/admin/users/" + targetUser.getId())
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(updateJson))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin@test.com", roles = "ADMIN")
+    void testAdmin_UpdateNonExistentUser_NotFound() throws Exception {
+        String updateJson = "{\"role\":\"DATA_PREP\"}";
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/admin/users/99999")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(updateJson))
+                .andExpect(status().isNotFound());
+    }
 }
