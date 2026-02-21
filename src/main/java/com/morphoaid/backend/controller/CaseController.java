@@ -10,7 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ public class CaseController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('DATA_PREP', 'ADMIN')")
     public ResponseEntity<CaseResponse> uploadCase(
             @RequestParam("patientCode") String patientCode,
             @RequestParam("technicianId") String technicianId,
@@ -70,21 +73,25 @@ public class CaseController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<List<CaseResponse>> getAllCases() {
         return ResponseEntity.ok(caseService.getCases());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<CaseResponse> getCaseById(@PathVariable Long id) {
         return ResponseEntity.ok(caseService.getCaseOrThrow(id));
     }
 
     @GetMapping("/{id}/ai-result")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<AIResultResponse> getAIResultByCaseId(@PathVariable Long id) {
         return ResponseEntity.ok(caseService.findAiResultByCaseId(id));
     }
 
     @PostMapping("/{id}/analyze")
+    @PreAuthorize("hasAnyRole('DATA_PREP', 'ADMIN')")
     public ResponseEntity<AIResultResponse> analyzeCase(@PathVariable Long id) {
         try {
             AIResultResponse result = caseService.analyzeCase(id);
