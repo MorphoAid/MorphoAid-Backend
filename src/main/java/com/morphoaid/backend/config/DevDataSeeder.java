@@ -22,15 +22,18 @@ public class DevDataSeeder implements CommandLineRunner {
         private final CaseRepository caseRepository;
         private final AIResultRepository aiResultRepository;
         private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+        private final com.morphoaid.backend.repository.InvitationTokenRepository invitationTokenRepository;
 
         @Autowired
         public DevDataSeeder(UserRepository userRepository, CaseRepository caseRepository,
                         AIResultRepository aiResultRepository,
-                        org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
+                        org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
+                        com.morphoaid.backend.repository.InvitationTokenRepository invitationTokenRepository) {
                 this.userRepository = userRepository;
                 this.caseRepository = caseRepository;
                 this.aiResultRepository = aiResultRepository;
                 this.passwordEncoder = passwordEncoder;
+                this.invitationTokenRepository = invitationTokenRepository;
         }
 
         @Override
@@ -64,6 +67,17 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .build();
 
                         userRepository.save(dataUseUser);
+                }
+
+                if (invitationTokenRepository.count() == 0) {
+                        com.morphoaid.backend.entity.InvitationToken token = com.morphoaid.backend.entity.InvitationToken
+                                        .builder()
+                                        .token("DEMO-DATAPREP-TOKEN-123")
+                                        .role(Role.DATA_PREP)
+                                        .expiresAt(java.time.LocalDateTime.now().plusDays(30))
+                                        .build();
+                        invitationTokenRepository.save(token);
+                        System.out.println("====== SEEDED DATAPREP TOKEN: DEMO-DATAPREP-TOKEN-123 ======");
                 }
 
                 // 2. Seed Cases if empty
