@@ -58,6 +58,11 @@ public class DevDataSeeder implements CommandLineRunner {
                         logger.info("Seeded admin: {} (password: Admin123!)", adminEmail);
                 } else {
                         savedUser = userRepository.findByEmail(adminEmail).get();
+                        // Fix for 401: ensure password is correct in dev
+                        savedUser.setPassword(passwordEncoder.encode("Admin123!"));
+                        userRepository.save(savedUser);
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DevDataSeeder.class);
+                        logger.info("Updated existing admin: {} (password: Admin123!)", adminEmail);
                 }
 
                 if (userRepository.findByEmail(dataUseEmail).isEmpty()) {

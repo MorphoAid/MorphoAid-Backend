@@ -81,9 +81,19 @@ public class AuthController {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElse(null);
 
-        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+
+        if (user == null) {
+            logger.warn("Login failed: User not found for email {}", request.getEmail());
             return ResponseEntity.status(401).build();
         }
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            logger.warn("Login failed: Password mismatch for email {}", request.getEmail());
+            return ResponseEntity.status(401).build();
+        }
+
+        logger.info("Login successful for email {}", request.getEmail());
 
         return ResponseEntity.ok(buildDummyResponse(user));
     }
