@@ -27,7 +27,7 @@ public class AdminUserController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/users")
+    @GetMapping(value = "/users", produces = "application/json")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AdminUserResponse>> getAllUsers() {
         List<User> users = userRepository.findAll();
