@@ -1,10 +1,11 @@
 package com.morphoaid.backend.controller;
 
 import com.morphoaid.backend.dto.AuthResponse;
-import com.morphoaid.backend.dto.DataPrepRegisterRequest;
 import com.morphoaid.backend.dto.LoginRequest;
-import com.morphoaid.backend.dto.RegisterRequest;
+import com.morphoaid.backend.dto.RegisterDataUseRequest;
+import com.morphoaid.backend.dto.RegisterDataPrepRequest;
 import com.morphoaid.backend.dto.UserSummary;
+import jakarta.validation.Valid;
 import com.morphoaid.backend.entity.Role;
 import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.repository.UserRepository;
@@ -33,39 +34,54 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        if (request.getPassword() == null || request.getPassword().length() < 6) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterDataUseRequest request) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            return buildValidationError("confirmPassword", "Passwords do not match");
         }
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().build();
+            return buildValidationError("email", "Email already in use");
+        }
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            return buildValidationError("username", "Username already in use");
         }
 
         User user = User.builder()
                 .email(request.getEmail())
+                .username(request.getUsername())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.DATA_USE)
                 .build();
 
         user = userRepository.save(user);
 
-        return ResponseEntity.ok(buildDummyResponse(user));
+        return ResponseEntity.status(201).body(buildDummyResponse(user));
     }
 
     @PostMapping("/register/dataprep")
-    public ResponseEntity<AuthResponse> registerDataPrep(@RequestBody DataPrepRegisterRequest request) {
-        // Validation of token implicitly throws exception if invalid
-        tokenService.validateToken(request.getInvitationToken());
+    public ResponseEntity<?> registerDataPrep(@RequestBody @Valid RegisterDataPrepRequest request) {
+        try {
+            tokenService.validateToken(request.getInvitationToken());
+        } catch (IllegalArgumentException e) {
+            return buildValidationError("invitationToken", "Invalid or missing token");
+        }
 
-        if (request.getPassword() == null || request.getPassword().length() < 6) {
-            return ResponseEntity.badRequest().build();
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            return buildValidationError("confirmPassword", "Passwords do not match");
         }
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().build();
+            return buildValidationError("email", "Email already in use");
+        }
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            return buildValidationError("username", "Username already in use");
         }
 
         User user = User.builder()
                 .email(request.getEmail())
+                .username(request.getUsername())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.DATA_PREP)
                 .build();
@@ -73,7 +89,15 @@ public class AuthController {
         user = userRepository.save(user);
         tokenService.markUsed(request.getInvitationToken(), user.getId());
 
-        return ResponseEntity.ok(buildDummyResponse(user));
+        return ResponseEntity.status(201).body(buildDummyResponse(user));
+    }
+
+    private ResponseEntity<java.util.Map<String, Object>> buildValidationError(String field, String message) {
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("timestamp", java.time.LocalDateTime.now().toString());
+        response.put("status", 400);
+        response.put("errors", java.util.Map.of(field, message));
+        return ResponseEntity.badRequest().body(response);
     }
 
     @PostMapping("/login")
