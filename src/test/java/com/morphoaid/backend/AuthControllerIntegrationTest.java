@@ -170,10 +170,10 @@ public class AuthControllerIntegrationTest {
         }
 
         @Test
-        void testLogin_Success() throws Exception {
+        void testLogin_OmittedRememberMe_Success() throws Exception {
                 RegisterDataUseRequest request = createValidDataUseRequest();
-                request.setEmail("loginuser@example.com");
-                request.setUsername("loguser");
+                request.setEmail("loginuser1@example.com");
+                request.setUsername("loguser1");
 
                 mockMvc.perform(post("/auth/register")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -181,8 +181,55 @@ public class AuthControllerIntegrationTest {
                                 .andExpect(status().isCreated());
 
                 LoginRequest loginRequest = new LoginRequest();
-                loginRequest.setEmail("loginuser@example.com");
+                loginRequest.setEmail("loginuser1@example.com");
                 loginRequest.setPassword("Password123!");
+                // Omitted rememberMe
+
+                mockMvc.perform(post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(loginRequest)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.accessToken").exists());
+        }
+
+        @Test
+        void testLogin_RememberMeTrue_Success() throws Exception {
+                RegisterDataUseRequest request = createValidDataUseRequest();
+                request.setEmail("loginuser2@example.com");
+                request.setUsername("loguser2");
+
+                mockMvc.perform(post("/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated());
+
+                LoginRequest loginRequest = new LoginRequest();
+                loginRequest.setEmail("loginuser2@example.com");
+                loginRequest.setPassword("Password123!");
+                loginRequest.setRememberMe(true);
+
+                mockMvc.perform(post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(loginRequest)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.accessToken").exists());
+        }
+
+        @Test
+        void testLogin_RememberMeFalse_Success() throws Exception {
+                RegisterDataUseRequest request = createValidDataUseRequest();
+                request.setEmail("loginuser3@example.com");
+                request.setUsername("loguser3");
+
+                mockMvc.perform(post("/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated());
+
+                LoginRequest loginRequest = new LoginRequest();
+                loginRequest.setEmail("loginuser3@example.com");
+                loginRequest.setPassword("Password123!");
+                loginRequest.setRememberMe(false);
 
                 mockMvc.perform(post("/auth/login")
                                 .contentType(MediaType.APPLICATION_JSON)

@@ -49,6 +49,7 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .password(passwordEncoder.encode("Admin123!"))
                                         .role(Role.ADMIN)
                                         .fullName("MorphoAid Admin")
+                                        .username("admin")
                                         .organization("MorphoAid")
                                         .build();
 
@@ -71,6 +72,7 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .password(passwordEncoder.encode("demopass"))
                                         .role(Role.DATA_USE)
                                         .fullName("Demo User")
+                                        .username("demo")
                                         .organization("MorphoAid Demo")
                                         .build();
 

@@ -61,6 +61,10 @@ public class AdminInvitationControllerIntegrationTest {
                 .password("encoded_pass")
                 .role(Role.ADMIN)
                 .build();
+                
+                
+                
+                
         User dataUse = User.builder()
                 .email("datause@test.com")
                 .password("encoded_pass")

@@ -117,7 +117,8 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
 
-        logger.info("Login successful for email {}", request.getEmail());
+        boolean remember = Boolean.TRUE.equals(request.getRememberMe());
+        logger.info("Login successful for email {}, rememberMe={}", request.getEmail(), remember);
 
         return ResponseEntity.ok(buildDummyResponse(user));
     }
