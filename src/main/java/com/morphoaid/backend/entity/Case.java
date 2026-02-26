@@ -45,6 +45,9 @@ public class Case {
     @JoinColumn(name = "uploaded_by")
     private User uploadedBy;
 
+    @OneToMany(mappedBy = "aCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<CaseImage> images = new java.util.ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
