@@ -41,11 +41,13 @@ public class AdminUserControllerIntegrationTest {
         userRepository.deleteAll();
         User admin = User.builder()
                 .email("admin@test.com")
+                .username("admin")
                 .password("encoded_pass")
                 .role(Role.ADMIN)
                 .build();
         User dataUse = User.builder()
                 .email("datause@test.com")
+                .username("datause")
                 .password("encoded_pass")
                 .role(Role.DATA_USE)
                 .build();

@@ -31,95 +31,94 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class AdminInvitationControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private InvitationTokenRepository tokenRepository;
+        @Autowired
+        private InvitationTokenRepository tokenRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private com.morphoaid.backend.repository.CaseRepository caseRepository;
+        @Autowired
+        private com.morphoaid.backend.repository.CaseRepository caseRepository;
 
-    @Autowired
-    private com.morphoaid.backend.repository.AIResultRepository aiResultRepository;
+        @Autowired
+        private com.morphoaid.backend.repository.AIResultRepository aiResultRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp() {
-        aiResultRepository.deleteAll();
-        caseRepository.deleteAll();
-        userRepository.deleteAll();
-        tokenRepository.deleteAll();
+        @BeforeEach
+        void setUp() {
+                aiResultRepository.deleteAll();
+                caseRepository.deleteAll();
+                userRepository.deleteAll();
+                tokenRepository.deleteAll();
 
-        User admin = User.builder()
-                .email("admin@test.com")
-                .password("encoded_pass")
-                .role(Role.ADMIN)
-                .build();
-                
-                
-                
-                
-        User dataUse = User.builder()
-                .email("datause@test.com")
-                .password("encoded_pass")
-                .role(Role.DATA_USE)
-                .build();
-        userRepository.save(admin);
-        userRepository.save(dataUse);
-    }
+                User admin = User.builder()
+                                .email("admin@test.com")
+                                .username("admin")
+                                .password("encoded_pass")
+                                .role(Role.ADMIN)
+                                .build();
 
-    @Test
-    @WithMockUser(username = "admin@test.com", roles = "ADMIN")
-    void testAdmin_CreateInvitationToken_Success() throws Exception {
-        CreateInvitationRequest request = new CreateInvitationRequest(7);
+                User dataUse = User.builder()
+                                .email("datause@test.com")
+                                .username("datause")
+                                .password("encoded_pass")
+                                .role(Role.DATA_USE)
+                                .build();
+                userRepository.save(admin);
+                userRepository.save(dataUse);
+        }
 
-        mockMvc.perform(post("/admin/invitations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.expiresAt").exists())
-                .andExpect(jsonPath("$.usedAt").doesNotExist());
-    }
+        @Test
+        @WithMockUser(username = "admin@test.com", roles = "ADMIN")
+        void testAdmin_CreateInvitationToken_Success() throws Exception {
+                CreateInvitationRequest request = new CreateInvitationRequest(7);
 
-    @Test
-    @WithMockUser(username = "datause@test.com", roles = "DATA_USE")
-    void testDataUse_CreateInvitationToken_Forbidden() throws Exception {
-        CreateInvitationRequest request = new CreateInvitationRequest(7);
+                mockMvc.perform(post("/admin/invitations")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.token").exists())
+                                .andExpect(jsonPath("$.expiresAt").exists())
+                                .andExpect(jsonPath("$.usedAt").doesNotExist());
+        }
 
-        mockMvc.perform(post("/admin/invitations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
-    }
+        @Test
+        @WithMockUser(username = "datause@test.com", roles = "DATA_USE")
+        void testDataUse_CreateInvitationToken_Forbidden() throws Exception {
+                CreateInvitationRequest request = new CreateInvitationRequest(7);
 
-    @Test
-    @WithMockUser(username = "admin@test.com", roles = "ADMIN")
-    void testAdmin_ListInvitationTokens_Success() throws Exception {
-        InvitationToken token = InvitationToken.builder()
-                .token("TEST_LIST_TOKEN_123")
-                .role(Role.DATA_PREP)
-                .expiresAt(LocalDateTime.now().plusDays(2))
-                .build();
-        tokenRepository.save(token);
+                mockMvc.perform(post("/admin/invitations")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isForbidden());
+        }
 
-        mockMvc.perform(get("/admin/invitations"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].token").value("TEST_LIST_TOKEN_123"))
-                .andExpect(jsonPath("$[0].expiresAt").exists());
-    }
+        @Test
+        @WithMockUser(username = "admin@test.com", roles = "ADMIN")
+        void testAdmin_ListInvitationTokens_Success() throws Exception {
+                InvitationToken token = InvitationToken.builder()
+                                .token("TEST_LIST_TOKEN_123")
+                                .role(Role.DATA_PREP)
+                                .expiresAt(LocalDateTime.now().plusDays(2))
+                                .build();
+                tokenRepository.save(token);
 
-    @Test
-    @WithMockUser(username = "datause@test.com", roles = "DATA_USE")
-    void testDataUse_ListInvitationTokens_Forbidden() throws Exception {
-        mockMvc.perform(get("/admin/invitations"))
-                .andExpect(status().isForbidden());
-    }
+                mockMvc.perform(get("/admin/invitations"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0].token").value("TEST_LIST_TOKEN_123"))
+                                .andExpect(jsonPath("$[0].expiresAt").exists());
+        }
+
+        @Test
+        @WithMockUser(username = "datause@test.com", roles = "DATA_USE")
+        void testDataUse_ListInvitationTokens_Forbidden() throws Exception {
+                mockMvc.perform(get("/admin/invitations"))
+                                .andExpect(status().isForbidden());
+        }
 }

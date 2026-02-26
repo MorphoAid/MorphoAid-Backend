@@ -57,6 +57,7 @@ public class AIIntegrationTest {
         // Create dummy user
         User uploader = new User();
         uploader.setEmail("tester@test.com");
+        uploader.setUsername("tester");
         uploader.setFullName("Test User");
         uploader.setPassword("hashedpassword");
         uploader.setRole(com.morphoaid.backend.entity.Role.DATA_USE);
