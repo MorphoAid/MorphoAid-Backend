@@ -101,16 +101,18 @@ public class DevDataSeeder implements CommandLineRunner {
                         List<Case> savedCases = caseRepository
                                         .saveAll(Arrays.asList(case1, case2, case3, case4, case5));
 
-                        // Seed 1 AI Result for Case 1
-                        AIResult ai1 = AIResult.builder()
-                                        .caseEntity(savedCases.get(0))
-                                        .parasiteStage("P. falciparum ring")
-                                        .drugExposure(false)
-                                        .confidence(0.98)
-                                        .rawResponseJson("{\"type\": \"falciparum\", \"stage\": \"ring\"}")
-                                        .build();
+                        if (savedCases != null && !savedCases.isEmpty()) {
+                                // Seed 1 AI Result for Case 1
+                                AIResult ai1 = AIResult.builder()
+                                                .caseEntity(savedCases.get(0))
+                                                .parasiteStage("P. falciparum ring")
+                                                .drugExposure(false)
+                                                .confidence(0.98)
+                                                .rawResponseJson("{\"type\": \"falciparum\", \"stage\": \"ring\"}")
+                                                .build();
 
-                        aiResultRepository.save(ai1);
+                                aiResultRepository.save(ai1);
+                        }
                 }
         }
 }

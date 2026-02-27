@@ -21,6 +21,7 @@ import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -74,6 +75,18 @@ public class S3StorageService implements StorageService {
         String objectKey = UUID.randomUUID().toString() + "_" + System.currentTimeMillis() + extension;
 
         try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(file.getBytes());
+            StringBuilder hexString = new StringBuilder(2 * hash.length);
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            String checksum = hexString.toString();
+
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
                     .key(objectKey)
@@ -88,6 +101,7 @@ public class S3StorageService implements StorageService {
                     .objectKey(objectKey)
                     .size(file.getSize())
                     .mimeType(file.getContentType())
+                    .checksum(checksum)
                     .uploadedBy(uploader)
                     .aCase(aCase)
                     .build();
@@ -104,9 +118,13 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public InputStream downloadImageContent(Long imageId) {
+    public InputStream downloadImageContent(Long caseId, Long imageId) {
         CaseImage image = caseImageRepository.findById(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+
+        if (!image.getACase().getId().equals(caseId)) {
+            throw new IllegalArgumentException("Image does not belong to the specified case");
+        }
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(image.getBucket())

@@ -48,17 +48,22 @@ public class CaseController {
     @PostMapping("/{caseId}/images")
     public ResponseEntity<?> uploadCaseImage(
             @PathVariable Long caseId,
-            @RequestParam("uploaderId") Long uploaderId,
-            @RequestParam("image") MultipartFile image) {
+            @RequestParam("image") MultipartFile image,
+            java.security.Principal principal) {
 
         try {
-            User uploader = userRepository.findById(uploaderId)
+            caseService.verifyCaseAccess(caseId, principal.getName());
+
+            User uploader = userRepository.findByEmail(principal.getName())
                     .orElseThrow(() -> new IllegalArgumentException("Uploader not found"));
 
             var caseImage = storageService.uploadCaseImage(caseId, image, uploader);
 
             return ResponseEntity.ok().body(caseImage);
 
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -71,16 +76,22 @@ public class CaseController {
     @GetMapping("/{caseId}/images/{imageId}/content")
     public ResponseEntity<InputStreamResource> downloadImageContent(
             @PathVariable Long caseId,
-            @PathVariable Long imageId) {
+            @PathVariable Long imageId,
+            java.security.Principal principal) {
 
         try {
-            java.io.InputStream inputStream = storageService.downloadImageContent(imageId);
+            caseService.verifyCaseAccess(caseId, principal.getName());
+
+            java.io.InputStream inputStream = storageService.downloadImageContent(caseId, imageId);
             InputStreamResource resource = new InputStreamResource(inputStream);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM) // Use concrete mime lookup or fallback
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"image_" + imageId + "\"")
                     .body(resource);
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
