@@ -10,29 +10,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-
 @Configuration
 @Profile("local")
 public class DevSecurityConfig {
-
-    @Bean
-    @Order(1)
-    public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/**")
-                .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/cases/**").permitAll()
-                        .anyRequest().permitAll())
-                .httpBasic(Customizer.withDefaults());
-
-        return http.build();
-    }
 
     @Bean
     public UserDetailsService devUserDetailsService(PasswordEncoder passwordEncoder) {
