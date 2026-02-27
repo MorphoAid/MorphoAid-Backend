@@ -18,6 +18,8 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,7 +74,7 @@ public class S3StorageService implements StorageService {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
 
-        String objectKey = UUID.randomUUID().toString() + "_" + System.currentTimeMillis() + extension;
+        String objectKey = "raw/" + caseId + "/" + System.currentTimeMillis() + "_" + UUID.randomUUID() + extension;
 
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -94,7 +96,9 @@ public class S3StorageService implements StorageService {
                     .serverSideEncryption(ServerSideEncryption.AES256)
                     .build();
 
+            logger.info("Attempting S3 Upload -> Bucket: {}, Key: {}", bucket, objectKey);
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            logger.info("SUCCESS: Object securely uploaded to S3 -> Key: {}", objectKey);
 
             CaseImage caseImage = CaseImage.builder()
                     .bucket(bucket)
@@ -108,6 +112,13 @@ public class S3StorageService implements StorageService {
 
             return caseImageRepository.save(caseImage);
 
+        } catch (S3Exception e) {
+            logger.error("AWS S3 Exception during upload attempt! Message: {}, Status: {}", e.getMessage(),
+                    e.statusCode(), e);
+            throw new RuntimeException("S3 Storage Exception", e);
+        } catch (SdkClientException e) {
+            logger.error("AWS SDK Client Exception. Check environment credentials. Message: {}", e.getMessage(), e);
+            throw new RuntimeException("AWS Credentials/Connection Context Error", e);
         } catch (IOException e) {
             logger.error("Failed to read file input stream", e);
             throw new RuntimeException("Failed to upload image", e);
