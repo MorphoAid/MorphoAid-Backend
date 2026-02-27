@@ -20,6 +20,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.repository.UserRepository;
 import com.morphoaid.backend.service.StorageService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/cases")
@@ -50,7 +52,13 @@ public class CaseController {
             @PathVariable Long caseId,
             @RequestParam("image") MultipartFile image,
             java.security.Principal principal) {
-
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("AUTH name={}, authorities={}", auth.getName(), auth.getAuthorities());
+        System.out.println("====== SECURITY DEBUG ======");
+        System.out.println("AUTH = " + auth);
+        System.out.println("NAME = " + (auth != null ? auth.getName() : null));
+        System.out.println("AUTHORITIES = " + (auth != null ? auth.getAuthorities() : null));
+        System.out.println("============================");
         try {
             caseService.verifyCaseAccess(caseId, principal.getName());
 
