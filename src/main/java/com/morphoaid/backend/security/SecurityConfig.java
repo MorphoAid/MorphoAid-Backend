@@ -12,9 +12,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 @EnableMethodSecurity
+@Profile("!local")
 public class SecurityConfig {
 
     @Bean
