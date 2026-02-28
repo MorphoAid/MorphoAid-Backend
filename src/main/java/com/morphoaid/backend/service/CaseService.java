@@ -4,6 +4,7 @@ import com.morphoaid.backend.dto.AIResultResponse;
 import com.morphoaid.backend.dto.CaseResponse;
 import com.morphoaid.backend.entity.AIResult;
 import com.morphoaid.backend.entity.Case;
+import com.morphoaid.backend.entity.Role;
 import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.exception.NotFoundException;
 import com.morphoaid.backend.repository.AIResultRepository;
@@ -18,6 +19,7 @@ import com.morphoaid.backend.integration.ai.UltralyticsPredictRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -145,6 +147,22 @@ public class CaseService {
         return aiResultRepository.findByCaseEntityId(caseId)
                 .map(this::toAIResultResponse)
                 .orElseThrow(() -> new NotFoundException("AI result not found"));
+    }
+
+    public void verifyCaseAccess(Long caseId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.getRole() == Role.ADMIN) {
+            return;
+        }
+
+        Case aCase = caseRepository.findById(caseId)
+                .orElseThrow(() -> new NotFoundException("Case not found with id: " + caseId));
+
+        if (aCase.getUploadedBy() == null || !aCase.getUploadedBy().getId().equals(user.getId())) {
+            throw new AccessDeniedException("User does not have access to this case");
+        }
     }
 
     private CaseResponse toCaseResponse(Case entity) {
