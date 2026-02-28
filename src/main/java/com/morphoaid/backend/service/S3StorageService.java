@@ -1,5 +1,6 @@
 package com.morphoaid.backend.service;
 
+import com.morphoaid.backend.config.S3Config;
 import com.morphoaid.backend.entity.Case;
 import com.morphoaid.backend.entity.CaseImage;
 import com.morphoaid.backend.entity.User;
@@ -32,7 +33,7 @@ import java.time.LocalDateTime;
 @Service
 public class S3StorageService implements StorageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(S3StorageService.class);
+    private static final Logger logger = LoggerFactory.getLogger(S3Config.class);
 
     private final S3Client s3Client;
     private final CaseImageRepository caseImageRepository;
@@ -112,19 +113,20 @@ public class S3StorageService implements StorageService {
 
             return caseImageRepository.save(caseImage);
 
-        } catch (S3Exception e) {
-            logger.error("AWS S3 Exception during upload attempt! Message: {}, Status: {}", e.getMessage(),
-                    e.statusCode(), e);
-            throw new RuntimeException("S3 Storage Exception", e);
-        } catch (SdkClientException e) {
-            logger.error("AWS SDK Client Exception. Check environment credentials. Message: {}", e.getMessage(), e);
-            throw new RuntimeException("AWS Credentials/Connection Context Error", e);
         } catch (IOException e) {
             logger.error("Failed to read file input stream", e);
             throw new RuntimeException("Failed to upload image", e);
         } catch (Exception e) {
-            logger.error("Failed to upload image to S3", e);
-            throw new RuntimeException("S3 Upload Error", e);
+            logger.error(
+                    "S3 upload failed. bucket=" + bucket
+                            + ", caseId=" + caseId
+                            + ", filename=" + file.getOriginalFilename(),
+                    e);
+
+            throw new RuntimeException(
+                    "S3 upload failed: " + e.getClass().getSimpleName()
+                            + " - " + e.getMessage(),
+                    e);
         }
     }
 

@@ -53,7 +53,8 @@ public class CaseController {
             @RequestParam("image") MultipartFile image,
             java.security.Principal principal) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("AUTH name={}, authorities={}", auth.getName(), auth.getAuthorities());
+        logger.info("AUTH name={}, authorities={}", auth != null ? auth.getName() : null,
+                auth != null ? auth.getAuthorities() : null);
         System.out.println("====== SECURITY DEBUG ======");
         System.out.println("AUTH = " + auth);
         System.out.println("NAME = " + (auth != null ? auth.getName() : null));

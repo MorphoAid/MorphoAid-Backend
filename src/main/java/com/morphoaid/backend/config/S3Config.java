@@ -28,6 +28,9 @@ public class S3Config {
         logger.info(" - Region: {}", awsRegion);
         logger.info(" - Bucket: {}", awsBucket);
         logger.info(" - Using: DefaultCredentialsProvider");
+        logger.info("ENV AWS_ACCESS_KEY_ID present? {}", System.getenv("AWS_ACCESS_KEY_ID") != null);
+        logger.info("ENV AWS_SECRET_ACCESS_KEY present? {}", System.getenv("AWS_SECRET_ACCESS_KEY") != null);
+        logger.info("ENV AWS_REGION = {}", System.getenv("AWS_REGION"));
         logger.info("===========================================================");
     }
 
