@@ -15,7 +15,6 @@ import java.util.List;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@EnableMethodSecurity
 @Profile("!local")
 public class SecurityConfig {
 
