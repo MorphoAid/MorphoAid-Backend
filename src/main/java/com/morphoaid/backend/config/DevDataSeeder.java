@@ -21,33 +21,73 @@ public class DevDataSeeder implements CommandLineRunner {
         private final UserRepository userRepository;
         private final CaseRepository caseRepository;
         private final AIResultRepository aiResultRepository;
+        private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+        private final com.morphoaid.backend.repository.InvitationTokenRepository invitationTokenRepository;
 
         @Autowired
         public DevDataSeeder(UserRepository userRepository, CaseRepository caseRepository,
-                        AIResultRepository aiResultRepository) {
+                        AIResultRepository aiResultRepository,
+                        org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
+                        com.morphoaid.backend.repository.InvitationTokenRepository invitationTokenRepository) {
                 this.userRepository = userRepository;
                 this.caseRepository = caseRepository;
                 this.aiResultRepository = aiResultRepository;
+                this.passwordEncoder = passwordEncoder;
+                this.invitationTokenRepository = invitationTokenRepository;
         }
 
         @Override
         public void run(String... args) throws Exception {
                 String adminEmail = "admin@test.com";
+                String dataUseEmail = "demo@morphoaid.com";
 
                 // 1. Seed User
                 User savedUser;
                 if (userRepository.findByEmail(adminEmail).isEmpty()) {
                         User adminUser = User.builder()
                                         .email(adminEmail)
-                                        .password("plainpass") // temp placeholder
+                                        .password(passwordEncoder.encode("Admin123!"))
                                         .role(Role.ADMIN)
-                                        .fullName("Admin")
+                                        .fullName("MorphoAid Admin")
+                                        .username("admin")
                                         .organization("MorphoAid")
                                         .build();
 
                         savedUser = userRepository.save(adminUser);
+
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DevDataSeeder.class);
+                        logger.info("Seeded admin: {} (password: Admin123!)", adminEmail);
                 } else {
                         savedUser = userRepository.findByEmail(adminEmail).get();
+                        // Fix for 401: ensure password is correct in dev
+                        savedUser.setPassword(passwordEncoder.encode("Admin123!"));
+                        userRepository.save(savedUser);
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DevDataSeeder.class);
+                        logger.info("Updated existing admin: {} (password: Admin123!)", adminEmail);
+                }
+
+                if (userRepository.findByEmail(dataUseEmail).isEmpty()) {
+                        User dataUseUser = User.builder()
+                                        .email(dataUseEmail)
+                                        .password(passwordEncoder.encode("demopass"))
+                                        .role(Role.DATA_USE)
+                                        .fullName("Demo User")
+                                        .username("demo")
+                                        .organization("MorphoAid Demo")
+                                        .build();
+
+                        userRepository.save(dataUseUser);
+                }
+
+                if (invitationTokenRepository.count() == 0) {
+                        com.morphoaid.backend.entity.InvitationToken token = com.morphoaid.backend.entity.InvitationToken
+                                        .builder()
+                                        .token("DEMO-DATAPREP-TOKEN-123")
+                                        .role(Role.DATA_PREP)
+                                        .expiresAt(java.time.LocalDateTime.now().plusDays(30))
+                                        .build();
+                        invitationTokenRepository.save(token);
+                        System.out.println("====== SEEDED DATAPREP TOKEN: DEMO-DATAPREP-TOKEN-123 ======");
                 }
 
                 // 2. Seed Cases if empty

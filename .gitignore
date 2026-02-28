@@ -37,3 +37,11 @@ run.log
 
 ### Properties ###
 application.properties
+
+# Logs
+*.log
+
+# Debug artifacts
+debug/
+logs/
+*.tmp

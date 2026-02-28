@@ -40,6 +40,7 @@ public class CaseController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('DATA_PREP', 'ADMIN')")
     public ResponseEntity<CaseResponse> uploadCase(
             @RequestParam("patientCode") String patientCode,
             @RequestParam("technicianId") String technicianId,
@@ -66,13 +67,20 @@ public class CaseController {
         if (contentType != null && !contentType.startsWith("image/")) {
             return ResponseEntity.badRequest().build();
         }
-
-        // Generate dummy imagePath (no real file storage yet)
-        String dummyImagePath = "/storage/dummy/" + UUID.randomUUID() + "-" + originalFilename;
-
         try {
+            // Save real image path temporarily for analyze demonstration
+            java.io.File destDir = new java.io.File(System.getProperty("user.dir"), "debug");
+            if (!destDir.exists())
+                destDir.mkdirs();
+
+            String safeFilename = UUID.randomUUID() + "-" + image.getOriginalFilename();
+            java.io.File destFile = new java.io.File(destDir, safeFilename);
+            image.transferTo(destFile);
+
+            String realImagePath = destFile.getAbsolutePath();
+
             // Call caseService.createCase (now returns DTO)
-            CaseResponse newCase = caseService.createCase(patientCode, dummyImagePath, technicianId, location,
+            CaseResponse newCase = caseService.createCase(patientCode, realImagePath, technicianId, location,
                     uploaderId);
 
             logger.info("Created new case with ID: {}", newCase.getId());
@@ -152,21 +160,25 @@ public class CaseController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<List<CaseResponse>> getAllCases() {
         return ResponseEntity.ok(caseService.getCases());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<CaseResponse> getCaseById(@PathVariable Long id) {
         return ResponseEntity.ok(caseService.getCaseOrThrow(id));
     }
 
     @GetMapping("/{id}/ai-result")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<AIResultResponse> getAIResultByCaseId(@PathVariable Long id) {
         return ResponseEntity.ok(caseService.findAiResultByCaseId(id));
     }
 
     @PostMapping("/{id}/analyze")
+    @PreAuthorize("hasAnyRole('DATA_PREP', 'ADMIN')")
     public ResponseEntity<AIResultResponse> analyzeCase(@PathVariable Long id) {
         try {
             AIResultResponse result = caseService.analyzeCase(id);

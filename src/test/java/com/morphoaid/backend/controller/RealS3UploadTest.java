@@ -12,8 +12,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.Disabled;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Disabled("Disabled because it requires real S3 credentials and a predefined case 1")
 public class RealS3UploadTest {
 
     @Autowired

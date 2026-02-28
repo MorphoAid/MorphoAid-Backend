@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
@@ -56,6 +57,7 @@ public class AIIntegrationTest {
         // Create dummy user
         User uploader = new User();
         uploader.setEmail("tester@test.com");
+        uploader.setUsername("tester");
         uploader.setFullName("Test User");
         uploader.setPassword("hashedpassword");
         uploader.setRole(com.morphoaid.backend.entity.Role.DATA_USE);
@@ -78,8 +80,8 @@ public class AIIntegrationTest {
     }
 
     @Test
-    void testAnalyzeEndpoint_Success() {
-        // Arrange Mock JSON Model Response
+    @WithMockUser(roles = "DATA_PREP")
+    void testAnalyzeEndpoint_Success() throws Exception { // Arrange Mock JSON Model Response
         String mockResponseJson = """
                 [
                   {
@@ -90,7 +92,7 @@ public class AIIntegrationTest {
                 ]
                 """;
 
-        when(mockUltralyticsClient.predict(any(byte[].class), any(String.class), any()))
+        when(mockUltralyticsClient.predict(any(byte[].class), any(String.class)))
                 .thenReturn(mockResponseJson);
 
         // Act
