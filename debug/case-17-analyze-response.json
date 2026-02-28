@@ -1,0 +1,11 @@
+﻿{
+    "id":  4,
+    "caseId":  17,
+    "parasiteStage":  null,
+    "drugExposure":  false,
+    "confidence":  0.0,
+    "drugType":  null,
+    "topClassId":  null,
+    "rawResponseJson":  "{\"images\":[{\"results\":[],\"shape\":[400,580],\"speed\":{\"inference\":148.12225,\"postprocess\":1.63954,\"preprocess\":2.60255}}],\"metadata\":{\"functionTimeAlive\":14869.518,\"functionTimeCall\":0.44,\"imageCount\":1,\"model\":\"yolov8n.pt\",\"version\":{\"python\":\"3.11.14\",\"torch\":\"2.9.1+cpu\",\"torchvision\":\"0.24.1+cpu\",\"ultralytics\":\"8.4.6\"}}}\n",
+    "createdAt":  "2026-02-21T19:43:33.1593876"
+}

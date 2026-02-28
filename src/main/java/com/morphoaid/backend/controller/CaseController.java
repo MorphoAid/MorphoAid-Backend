@@ -41,8 +41,23 @@ public class CaseController {
             return ResponseEntity.badRequest().build();
         }
 
+        // Validate file extensions for PNG, JPG, JPEG
+        String originalFilename = image.getOriginalFilename();
+        if (originalFilename != null) {
+            String lowerCaseName = originalFilename.toLowerCase();
+            if (!lowerCaseName.endsWith(".png") && !lowerCaseName.endsWith(".jpg")
+                    && !lowerCaseName.endsWith(".jpeg")) {
+                return ResponseEntity.badRequest().build(); // or throw custom exception
+            }
+        }
+
+        String contentType = image.getContentType();
+        if (contentType != null && !contentType.startsWith("image/")) {
+            return ResponseEntity.badRequest().build();
+        }
+
         // Generate dummy imagePath (no real file storage yet)
-        String dummyImagePath = "/storage/dummy/" + UUID.randomUUID() + "-" + image.getOriginalFilename();
+        String dummyImagePath = "/storage/dummy/" + UUID.randomUUID() + "-" + originalFilename;
 
         try {
             // Call caseService.createCase (now returns DTO)

@@ -20,6 +20,32 @@ public class UltralyticsParser {
         try {
             JsonNode root = objectMapper.readTree(rawJson);
 
+            // New Format: {"images": [{"results": [{"class": 4, "confidence": 0.86,
+            // ...}]}]}
+            if (root.isObject() && root.has("images") && root.get("images").isArray()
+                    && !root.get("images").isEmpty()) {
+                JsonNode firstImageResult = root.get("images").get(0);
+                JsonNode results = firstImageResult.path("results");
+
+                if (results.isArray() && !results.isEmpty()) {
+                    JsonNode topResult = null;
+                    double maxConf = -1.0;
+
+                    for (JsonNode result : results) {
+                        double conf = result.path("confidence").asDouble(0.0);
+                        if (conf > maxConf) {
+                            maxConf = conf;
+                            topResult = result;
+                        }
+                    }
+
+                    if (topResult != null) {
+                        int classId = topResult.path("class").asInt(0);
+                        return Optional.of(mapDetection(classId, maxConf, rawJson));
+                    }
+                }
+            }
+
             // Expected format: array of objects containing `boxes` or `probs` arrays...
             // Standard predict API often returns array of images
             if (root.isArray() && !root.isEmpty()) {

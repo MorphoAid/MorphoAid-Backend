@@ -1,0 +1,283 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.morphoaid:backend >------------------------
+[INFO] Building morphoaid-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.10:run (default-cli) > test-compile @ backend >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ backend ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ backend ---
+[INFO] skip non existing resourceDirectory D:\Senior Project\for ai\backend\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ backend ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.5.10:run (default-cli) < test-compile @ backend <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.10:run (default-cli) @ backend ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.10)
+
+2026-02-23T18:16:03.481+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] c.m.backend.MorphoaidBackendApplication  : Starting MorphoaidBackendApplication using Java 21.0.6 with PID 29668 (D:\Senior Project\for ai\backend\backend\target\classes started by seksa in D:\Senior Project\for ai\backend\backend)
+2026-02-23T18:16:03.482+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] c.m.backend.MorphoaidBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2026-02-23T18:16:03.521+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-02-23T18:16:03.521+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-02-23T18:16:04.260+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-23T18:16:04.307+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 40 ms. Found 4 JPA repository interfaces.
+2026-02-23T18:16:04.780+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2026-02-23T18:16:04.790+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-23T18:16:04.790+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-02-23T18:16:04.821+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-02-23T18:16:04.821+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1300 ms
+2026-02-23T18:16:04.921+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : Class com.mysql.cj.jdbc.Driver found in Thread context class loader TomcatEmbeddedWebappClassLoader
+  context: ROOT
+  delegate: true
+----------> Parent Classloader:
+org.springframework.boot.devtools.restart.classloader.RestartClassLoader@363708e0
+
+2026-02-23T18:16:04.990+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-23T18:16:05.018+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.41.Final
+2026-02-23T18:16:05.038+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-02-23T18:16:05.216+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-23T18:16:05.233+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : HikariPool-1 - configuration:
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : allowPoolSuspension.............false
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : autoCommit......................true
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : catalog.........................none
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : connectionInitSql...............none
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : connectionTestQuery.............none
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : connectionTimeout...............30000
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : credentials.....................com.zaxxer.hikari.util.Credentials@515cb42b
+2026-02-23T18:16:05.235+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : dataSource......................none
+2026-02-23T18:16:05.237+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : dataSourceClassName.............none
+2026-02-23T18:16:05.237+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : dataSourceJNDI..................none
+2026-02-23T18:16:05.237+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : dataSourceProperties............{password=<masked>}
+2026-02-23T18:16:05.237+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : driverClassName................."com.mysql.cj.jdbc.Driver"
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : exceptionOverride...............none
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : exceptionOverrideClassName......none
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : healthCheckProperties...........{}
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : healthCheckRegistry.............none
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : idleTimeout.....................600000
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : initializationFailTimeout.......1
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : isolateInternalQueries..........false
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : jdbcUrl.........................jdbc:mysql://localhost:3306/morphoaid_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : keepaliveTime...................120000
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : leakDetectionThreshold..........0
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : maxLifetime.....................1800000
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : maximumPoolSize.................10
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : metricRegistry..................none
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : metricsTrackerFactory...........none
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : minimumIdle.....................10
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : password........................<masked>
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : poolName........................"HikariPool-1"
+2026-02-23T18:16:05.238+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : readOnly........................false
+2026-02-23T18:16:05.239+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : registerMbeans..................false
+2026-02-23T18:16:05.239+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : scheduledExecutor...............none
+2026-02-23T18:16:05.239+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : schema..........................none
+2026-02-23T18:16:05.239+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : threadFactory...................internal
+2026-02-23T18:16:05.239+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : transactionIsolation............default
+2026-02-23T18:16:05.239+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : username........................"root"
+2026-02-23T18:16:05.239+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariConfig           : validationTimeout...............5000
+2026-02-23T18:16:05.239+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-02-23T18:16:05.252+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (0945eef6-4519-4a77-8370-e380c9a8c6db)
+2026-02-23T18:16:05.382+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (0945eef6-4519-4a77-8370-e380c9a8c6db)
+2026-02-23T18:16:05.385+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5924ee01
+2026-02-23T18:16:05.386+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-02-23T18:16:05.388+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.h.e.j.e.i.JdbcEnvironmentInitiator     : Database ->
+	   name : MySQL
+	version : 8.0.42
+	  major : 8
+	  minor : 0
+2026-02-23T18:16:05.389+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.h.e.j.e.i.JdbcEnvironmentInitiator     : Driver ->
+	   name : MySQL Connector/J
+	version : mysql-connector-j-9.5.0 (Revision: a7b3c94f50efbddb9f0dd69b3e0d1aaa25305cd6)
+	  major : 9
+	  minor : 5
+2026-02-23T18:16:05.389+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.h.e.j.e.i.JdbcEnvironmentInitiator     : JDBC version : 4.2
+2026-02-23T18:16:05.440+07:00  WARN 29668 --- [morphoaid-backend] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-02-23T18:16:05.459+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0.42
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-02-23T18:16:05.490+07:00 DEBUG 29668 --- [morphoaid-backend] [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=1/10, idle=1/10, active=0, waiting=0)
+2026-02-23T18:16:05.490+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (f867cb36-1af2-410a-8bd1-822764f5d2a6)
+2026-02-23T18:16:05.495+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (f867cb36-1af2-410a-8bd1-822764f5d2a6)
+2026-02-23T18:16:05.495+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@71324c28
+2026-02-23T18:16:05.537+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=2/10, idle=2/10, active=0, waiting=0)
+2026-02-23T18:16:05.537+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (c657afbe-8741-4c14-9b4b-01ab8638c3b5)
+2026-02-23T18:16:05.541+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (c657afbe-8741-4c14-9b4b-01ab8638c3b5)
+2026-02-23T18:16:05.541+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@62c5c539
+2026-02-23T18:16:05.584+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=3/10, idle=3/10, active=0, waiting=0)
+2026-02-23T18:16:05.584+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (40c32587-ec0c-410d-ba66-53ee1dc5a2f9)
+2026-02-23T18:16:05.586+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (40c32587-ec0c-410d-ba66-53ee1dc5a2f9)
+2026-02-23T18:16:05.588+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1ad54bcb
+2026-02-23T18:16:05.630+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=4/10, idle=4/10, active=0, waiting=0)
+2026-02-23T18:16:05.630+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (e5a60aac-4205-44f6-945b-004ba6c5be5d)
+2026-02-23T18:16:05.634+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (e5a60aac-4205-44f6-945b-004ba6c5be5d)
+2026-02-23T18:16:05.634+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1c80526c
+2026-02-23T18:16:05.676+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=5/10, idle=5/10, active=0, waiting=0)
+2026-02-23T18:16:05.676+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (0aea63d5-e592-4432-a705-09e68a810f7a)
+2026-02-23T18:16:05.684+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (0aea63d5-e592-4432-a705-09e68a810f7a)
+2026-02-23T18:16:05.685+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1d126f2
+2026-02-23T18:16:05.722+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=6/10, idle=6/10, active=0, waiting=0)
+2026-02-23T18:16:05.722+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (9f6facf2-5334-4933-902c-c917fc121601)
+2026-02-23T18:16:05.725+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (9f6facf2-5334-4933-902c-c917fc121601)
+2026-02-23T18:16:05.725+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4a63be1e
+2026-02-23T18:16:05.769+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=7/10, idle=7/10, active=0, waiting=0)
+2026-02-23T18:16:05.769+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (ae7447fb-2d9d-4303-b50e-f625c2180000)
+2026-02-23T18:16:05.772+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (ae7447fb-2d9d-4303-b50e-f625c2180000)
+2026-02-23T18:16:05.772+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@26434854
+2026-02-23T18:16:05.815+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=8/10, idle=8/10, active=0, waiting=0)
+2026-02-23T18:16:05.815+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (3b3097cf-c866-4dcf-a0de-8cdb3daf8730)
+2026-02-23T18:16:05.820+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (3b3097cf-c866-4dcf-a0de-8cdb3daf8730)
+2026-02-23T18:16:05.821+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@51e72c38
+2026-02-23T18:16:05.862+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=9/10, idle=9/10, active=0, waiting=0)
+2026-02-23T18:16:05.862+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (dacbb06a-13b4-447e-9d86-96683b17764e)
+2026-02-23T18:16:05.865+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (dacbb06a-13b4-447e-9d86-96683b17764e)
+2026-02-23T18:16:05.865+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2bdfbbb4
+2026-02-23T18:16:05.910+07:00 DEBUG 29668 --- [morphoaid-backend] [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=10/10, idle=10/10, active=0, waiting=0)
+2026-02-23T18:16:06.105+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-02-23T18:16:06.160+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-23T18:16:06.371+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.s.w.f.ServerHttpObservationFilter      : Filter 'webMvcObservationFilter' configured for use
+2026-02-23T18:16:06.735+07:00  WARN 29668 --- [morphoaid-backend] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-02-23T18:16:06.765+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2026-02-23T18:16:06.854+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 15 mappings in 'requestMappingHandlerMapping'
+2026-02-23T18:16:06.878+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2026-02-23T18:16:06.965+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-02-23T18:16:07.093+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-02-23T18:16:07.132+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-02-23T18:16:07.265+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-02-23T18:16:07.318+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+2026-02-23T18:16:07.326+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] c.m.backend.MorphoaidBackendApplication  : Started MorphoaidBackendApplication in 4.16 seconds (process running for 4.448)
+================= DB PROBE RUNNER =================
+Driver Name: MySQL Connector/J
+Database Product Name: MySQL
+URL: jdbc:mysql://localhost:3306/morphoaid_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+==================================================
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.first_name,
+        u1_0.full_name,
+        u1_0.last_name,
+        u1_0.organization,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    insert 
+    into
+        users
+        (created_at, email, first_name, full_name, last_name, organization, password, role, updated_at, username) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-02-23T18:16:07.596+07:00  INFO 29668 --- [morphoaid-backend] [  restartedMain] c.m.backend.config.DevDataSeeder         : Seeded admin: admin@test.com (password: Admin123!)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.first_name,
+        u1_0.full_name,
+        u1_0.last_name,
+        u1_0.organization,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    insert 
+    into
+        users
+        (created_at, email, first_name, full_name, last_name, organization, password, role, updated_at, username) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-02-23T18:16:07.669+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@162360559 wrapping com.mysql.cj.jdbc.ConnectionImpl@5924ee01] read-only
+Hibernate: 
+    select
+        count(*) 
+    from
+        invitation_tokens it1_0
+2026-02-23T18:16:07.841+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@162360559 wrapping com.mysql.cj.jdbc.ConnectionImpl@5924ee01]
+2026-02-23T18:16:07.842+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1209625716 wrapping com.mysql.cj.jdbc.ConnectionImpl@5924ee01] read-only
+Hibernate: 
+    select
+        count(*) 
+    from
+        cases c1_0
+2026-02-23T18:16:07.846+07:00 DEBUG 29668 --- [morphoaid-backend] [  restartedMain] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1209625716 wrapping com.mysql.cj.jdbc.ConnectionImpl@5924ee01]
+Hibernate: 
+    insert 
+    into
+        cases
+        (created_at, image_path, location, patient_code, status, technician_id, uploaded_by) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        cases
+        (created_at, image_path, location, patient_code, status, technician_id, uploaded_by) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        cases
+        (created_at, image_path, location, patient_code, status, technician_id, uploaded_by) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        cases
+        (created_at, image_path, location, patient_code, status, technician_id, uploaded_by) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        cases
+        (created_at, image_path, location, patient_code, status, technician_id, uploaded_by) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        ai_results
+        (case_id, confidence, created_at, drug_exposure, drug_type, parasite_stage, raw_response_json, top_class_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?)
+2026-02-23T18:16:35.503+07:00 DEBUG 29668 --- [morphoaid-backend] [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10/10, idle=10/10, active=0, waiting=0)
+2026-02-23T18:16:35.503+07:00 DEBUG 29668 --- [morphoaid-backend] [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool has sufficient level or currently being filled.
