@@ -40,7 +40,7 @@ public class CaseController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('DATA_PREP', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<CaseResponse> uploadCase(
             @RequestParam("patientCode") String patientCode,
             @RequestParam("technicianId") String technicianId,
@@ -178,7 +178,7 @@ public class CaseController {
     }
 
     @PostMapping("/{id}/analyze")
-    @PreAuthorize("hasAnyRole('DATA_PREP', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<AIResultResponse> analyzeCase(@PathVariable Long id) {
         try {
             AIResultResponse result = caseService.analyzeCase(id);
