@@ -101,6 +101,15 @@ public class S3StorageService implements StorageService {
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
             logger.info("SUCCESS: Object securely uploaded to S3 -> Key: {}", objectKey);
 
+            String oldKey = null;
+            String oldBucket = null;
+            if (aCase.getImage() != null) {
+                oldKey = aCase.getImage().getObjectKey();
+                oldBucket = aCase.getImage().getBucket();
+                aCase.replaceImage(null);
+                caseRepository.saveAndFlush(aCase);
+            }
+
             CaseImage caseImage = CaseImage.builder()
                     .bucket(bucket)
                     .objectKey(objectKey)
@@ -113,6 +122,21 @@ public class S3StorageService implements StorageService {
 
             aCase.replaceImage(caseImage);
             Case updatedCase = caseRepository.save(aCase);
+
+            if (oldKey != null && !oldKey.equals(objectKey)) {
+                try {
+                    software.amazon.awssdk.services.s3.model.DeleteObjectRequest deleteReq = software.amazon.awssdk.services.s3.model.DeleteObjectRequest
+                            .builder()
+                            .bucket(oldBucket)
+                            .key(oldKey)
+                            .build();
+                    s3Client.deleteObject(deleteReq);
+                    logger.info("Deleted old S3 object for caseId={}, key={}", caseId, oldKey);
+                } catch (Exception e) {
+                    logger.warn("Failed to delete old S3 object for caseId={}, key={}: {}", caseId, oldKey,
+                            e.getMessage());
+                }
+            }
 
             return updatedCase.getImage();
 

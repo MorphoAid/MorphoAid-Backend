@@ -91,8 +91,8 @@ public class CaseService {
         Case targetCase = caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found with id: " + caseId));
 
-        if (targetCase.getImagePath() == null || targetCase.getImagePath().isEmpty()) {
-            throw new IllegalArgumentException("Case does not have an associated image.");
+        if (targetCase.getImage() == null) {
+            throw new IllegalArgumentException("Case has no image. Upload image before requesting analysis.");
         }
 
         byte[] imageBytes;

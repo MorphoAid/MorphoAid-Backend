@@ -12,7 +12,7 @@ public class CaseResponse {
     private String technicianId;
     private String location;
     private String status;
-    private String imagePath;
+    private String imagePath; // TODO: Expose a single CaseImage object when frontend allows
     private LocalDateTime createdAt;
     private Long uploadedById;
 }
