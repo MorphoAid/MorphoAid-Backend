@@ -2,6 +2,7 @@ package com.morphoaid.backend.config;
 
 import com.morphoaid.backend.entity.AIResult;
 import com.morphoaid.backend.entity.Case;
+import com.morphoaid.backend.entity.CaseImage;
 import com.morphoaid.backend.entity.CaseStatus;
 import com.morphoaid.backend.entity.Role;
 import com.morphoaid.backend.entity.User;
@@ -143,8 +144,19 @@ public class DevDataSeeder implements CommandLineRunner {
 
                         if (savedCases != null && !savedCases.isEmpty()) {
                                 // Seed 1 AI Result for Case 1
+                                CaseImage dummyImg = CaseImage.builder()
+                                                .bucket("dummy")
+                                                .objectKey("dummy_" + System.currentTimeMillis() + ".png")
+                                                .size(1024L)
+                                                .mimeType("image/png")
+                                                .uploadedBy(savedUser)
+                                                .aCase(savedCases.get(0))
+                                                .build();
+                                savedCases.get(0).replaceImage(dummyImg);
+                                caseRepository.save(savedCases.get(0));
+
                                 AIResult ai1 = AIResult.builder()
-                                                .caseEntity(savedCases.get(0))
+                                                .image(savedCases.get(0).getImage())
                                                 .parasiteStage("P. falciparum ring")
                                                 .drugExposure(false)
                                                 .confidence(0.98)

@@ -110,7 +110,10 @@ public class CaseService {
         Optional<UltralyticsDetection> detectionOpt = ultralyticsParser.parseTopDetection(rawResponse);
 
         AIResult aiResult = new AIResult();
-        aiResult.setCaseEntity(targetCase);
+        if (targetCase.getImage() == null) {
+            throw new IllegalArgumentException("Case does not have an associated CaseImage to analyze.");
+        }
+        aiResult.setImage(targetCase.getImage());
         aiResult.setRawResponseJson(rawResponse);
 
         if (detectionOpt.isPresent()) {
@@ -154,11 +157,11 @@ public class CaseService {
     }
 
     public Optional<AIResultResponse> getAIResultByCaseId(Long caseId) {
-        return aiResultRepository.findByCaseEntityId(caseId).map(this::toAIResultResponse);
+        return aiResultRepository.findByCaseId(caseId).map(this::toAIResultResponse);
     }
 
     public AIResultResponse findAiResultByCaseId(Long caseId) {
-        return aiResultRepository.findByCaseEntityId(caseId)
+        return aiResultRepository.findByCaseId(caseId)
                 .map(this::toAIResultResponse)
                 .orElseThrow(() -> new NotFoundException("AI result not found"));
     }
@@ -195,7 +198,9 @@ public class CaseService {
     private AIResultResponse toAIResultResponse(AIResult entity) {
         return AIResultResponse.builder()
                 .id(entity.getId())
-                .caseId(entity.getCaseEntity() != null ? entity.getCaseEntity().getId() : null)
+                .caseId(entity.getImage() != null && entity.getImage().getACase() != null
+                        ? entity.getImage().getACase().getId()
+                        : null)
                 .parasiteStage(entity.getParasiteStage())
                 .drugExposure(entity.getDrugExposure())
                 .drugType(entity.getDrugType())

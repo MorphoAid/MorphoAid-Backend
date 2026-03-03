@@ -44,8 +44,9 @@ public class CaseImage {
     @JoinColumn(name = "uploaded_by", nullable = false)
     private User uploadedBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "case_id", referencedColumnName = "id", unique = true, nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private Case aCase;
 
     @PrePersist

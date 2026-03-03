@@ -111,7 +111,10 @@ public class S3StorageService implements StorageService {
                     .aCase(aCase)
                     .build();
 
-            return caseImageRepository.save(caseImage);
+            aCase.replaceImage(caseImage);
+            Case updatedCase = caseRepository.save(aCase);
+
+            return updatedCase.getImage();
 
         } catch (IOException e) {
             logger.error("Failed to read file input stream", e);

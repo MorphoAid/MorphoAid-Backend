@@ -23,8 +23,8 @@ public class AIResult {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "case_id", nullable = false)
-    private Case caseEntity;
+    @JoinColumn(name = "image_id", referencedColumnName = "id", unique = true, nullable = false)
+    private CaseImage image;
 
     @Column(name = "parasite_stage")
     private String parasiteStage;

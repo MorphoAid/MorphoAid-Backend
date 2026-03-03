@@ -45,8 +45,19 @@ public class Case {
     @JoinColumn(name = "uploaded_by")
     private User uploadedBy;
 
-    @OneToMany(mappedBy = "aCase", cascade = CascadeType.ALL, orphanRemoval = true)
-    private java.util.List<CaseImage> images = new java.util.ArrayList<>();
+    @OneToOne(mappedBy = "aCase", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, optional = true)
+    @com.fasterxml.jackson.annotation.JsonManagedReference
+    private CaseImage image;
+
+    public void replaceImage(CaseImage newImage) {
+        if (this.image != null) {
+            this.image.setACase(null);
+        }
+        this.image = newImage;
+        if (newImage != null) {
+            newImage.setACase(this);
+        }
+    }
 
     @PrePersist
     protected void onCreate() {
