@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class InvitationResponse {
 
-    private String token;
+    private String code;
+    private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private LocalDateTime usedAt;
     private Long usedByUserId;
