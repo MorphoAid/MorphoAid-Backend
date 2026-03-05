@@ -9,4 +9,7 @@ import java.util.List;
 @Repository
 public interface CaseImageRepository extends JpaRepository<CaseImage, Long> {
     List<CaseImage> findByaCaseId(Long caseId);
+
+    /** Used by export image fallback — most-recently uploaded first. */
+    List<CaseImage> findByaCaseIdOrderByCreatedAtDesc(Long caseId);
 }

@@ -4,10 +4,12 @@ import com.morphoaid.backend.dto.AIResultResponse;
 import com.morphoaid.backend.dto.CaseResponse;
 import com.morphoaid.backend.entity.AIResult;
 import com.morphoaid.backend.entity.Case;
+import com.morphoaid.backend.entity.CaseImage;
 import com.morphoaid.backend.entity.Role;
 import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.exception.NotFoundException;
 import com.morphoaid.backend.repository.AIResultRepository;
+import com.morphoaid.backend.repository.CaseImageRepository;
 import com.morphoaid.backend.repository.CaseRepository;
 import com.morphoaid.backend.repository.UserRepository;
 import com.morphoaid.backend.entity.CaseStatus;
@@ -34,16 +36,18 @@ public class CaseService {
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
     private final AIResultRepository aiResultRepository;
+    private final CaseImageRepository caseImageRepository;
     private final UltralyticsClient ultralyticsClient;
     private final UltralyticsParser ultralyticsParser;
 
     @Autowired
     public CaseService(CaseRepository caseRepository, UserRepository userRepository,
-            AIResultRepository aiResultRepository, UltralyticsClient ultralyticsClient,
-            UltralyticsParser ultralyticsParser) {
+            AIResultRepository aiResultRepository, CaseImageRepository caseImageRepository,
+            UltralyticsClient ultralyticsClient, UltralyticsParser ultralyticsParser) {
         this.caseRepository = caseRepository;
         this.userRepository = userRepository;
         this.aiResultRepository = aiResultRepository;
+        this.caseImageRepository = caseImageRepository;
         this.ultralyticsClient = ultralyticsClient;
         this.ultralyticsParser = ultralyticsParser;
     }
@@ -51,37 +55,20 @@ public class CaseService {
     @Transactional
     public CaseResponse createCase(String patientCode, String imagePath, String technicianId, String location,
             Long uploaderId) {
-        User uploadedBy;
-        try {
-            uploadedBy = userRepository.findById(uploaderId)
-                    .orElse(null);
-            if (uploadedBy == null) {
-                uploadedBy = userRepository.findAll().stream().findFirst().orElse(null);
-                if (uploadedBy == null) {
-                    uploadedBy = User.builder()
-                            .email("live-test-" + System.currentTimeMillis() + "@morphoaid.com")
-                            .fullName("Live Tester")
-                            .password("dummy")
-                            .role(com.morphoaid.backend.entity.Role.ADMIN)
-                            .build();
-                    uploadedBy = userRepository.save(uploadedBy);
-                }
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("User initialization failed " + uploaderId);
-        }
+        // 1. ค้นหา User จาก uploaderId ที่ส่งมา
+        User uploadedBy = userRepository.findById(uploaderId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + uploaderId));
 
-        // Build Case entity
+        // 2. เมื่อมั่นใจว่ามี User แน่นอน ค่อยสร้าง Case
         Case newCase = Case.builder()
                 .patientCode(patientCode)
                 .imagePath(imagePath)
                 .technicianId(technicianId)
                 .location(location)
                 .uploadedBy(uploadedBy)
-                // status and createdAt are automatically set by @PrePersist
                 .build();
 
-        // Save
+        // 3. บันทึกข้อมูล
         Case savedCase = caseRepository.save(newCase);
         return toCaseResponse(savedCase);
     }
@@ -94,6 +81,15 @@ public class CaseService {
         if (targetCase.getImage() == null) {
             throw new IllegalArgumentException("Case has no image. Upload image before requesting analysis.");
         }
+
+        // Resolve the CaseImage entity to attach to AIResult.
+        // ai_results.image_id is NOT NULL in the live DB schema, so this is mandatory.
+        CaseImage selectedImage = caseImageRepository
+                .findByaCaseIdOrderByCreatedAtDesc(caseId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Case has no CaseImage; cannot analyze (caseId=" + caseId + ")"));
 
         byte[] imageBytes;
         try {
@@ -115,6 +111,8 @@ public class CaseService {
         }
         aiResult.setImage(targetCase.getImage());
         aiResult.setRawResponseJson(rawResponse);
+        // *** Critical: always set caseImage so image_id FK constraint is satisfied ***
+        aiResult.setCaseImage(selectedImage);
 
         if (detectionOpt.isPresent()) {
             UltralyticsDetection detection = detectionOpt.get();
@@ -129,7 +127,7 @@ public class CaseService {
             aiResult.setDrugExposure(false);
         }
 
-        // Save AI Result
+        // Save AI Result (image_id will now always be set)
         aiResult = aiResultRepository.save(aiResult);
 
         // Update Case status

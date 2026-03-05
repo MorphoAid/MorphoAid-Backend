@@ -26,6 +26,15 @@ public class AIResult {
     @JoinColumn(name = "image_id", referencedColumnName = "id", unique = true, nullable = false)
     private CaseImage image;
 
+    /**
+     * The specific image that was analyzed.
+     * Mapped to `image_id` column in ai_results table (NOT NULL in live DB).
+     * Marked optional=true in JPA but must be supplied on insert.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id", nullable = true)
+    private CaseImage caseImage;
+
     @Column(name = "parasite_stage")
     private String parasiteStage;
 
