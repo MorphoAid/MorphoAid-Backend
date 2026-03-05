@@ -11,12 +11,14 @@ import com.morphoaid.backend.repository.CaseRepository;
 import com.morphoaid.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Component
+@Profile("!test")
 public class DevDataSeeder implements CommandLineRunner {
 
         private final UserRepository userRepository;
@@ -150,13 +152,13 @@ public class DevDataSeeder implements CommandLineRunner {
                                                 .size(1024L)
                                                 .mimeType("image/png")
                                                 .uploadedBy(savedUser)
-                                                .aCase(savedCases.get(0))
+                                                .caseEntity(savedCases.get(0))
                                                 .build();
                                 savedCases.get(0).replaceImage(dummyImg);
                                 caseRepository.save(savedCases.get(0));
 
                                 AIResult ai1 = AIResult.builder()
-                                                .image(savedCases.get(0).getImage())
+                                                .caseImage(savedCases.get(0).getImage())
                                                 .parasiteStage("P. falciparum ring")
                                                 .drugExposure(false)
                                                 .confidence(0.98)

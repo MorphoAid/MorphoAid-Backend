@@ -47,7 +47,7 @@ public class CaseImage {
     @OneToOne
     @JoinColumn(name = "case_id", referencedColumnName = "id", unique = true, nullable = false)
     @com.fasterxml.jackson.annotation.JsonBackReference
-    private Case aCase;
+    private Case caseEntity;
 
     @PrePersist
     protected void onCreate() {

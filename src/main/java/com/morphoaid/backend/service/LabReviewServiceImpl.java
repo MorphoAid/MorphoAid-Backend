@@ -65,10 +65,10 @@ public class LabReviewServiceImpl implements LabReviewService {
         }
 
         // --- AI result (may be absent for PENDING cases that slipped through) ---
-        Optional<AIResult> aiResult = aiResultRepository.findByCaseEntityId(aCase.getId());
+        Optional<AIResult> aiResult = aiResultRepository.findByCaseImageCaseEntityId(aCase.getId());
 
         // --- First image id only (no objectKey / bucket / checksum exposed) ---
-        Long imageId = caseImageRepository.findByaCaseId(aCase.getId())
+        Long imageId = caseImageRepository.findByCaseEntityId(aCase.getId())
                 .stream()
                 .findFirst()
                 .map(CaseImage::getId)

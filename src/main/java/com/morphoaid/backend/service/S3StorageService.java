@@ -117,7 +117,7 @@ public class S3StorageService implements StorageService {
                     .mimeType(file.getContentType())
                     .checksum(checksum)
                     .uploadedBy(uploader)
-                    .aCase(aCase)
+                    .caseEntity(aCase)
                     .build();
 
             aCase.replaceImage(caseImage);
@@ -162,7 +162,7 @@ public class S3StorageService implements StorageService {
         CaseImage image = caseImageRepository.findById(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("Image not found"));
 
-        if (!image.getACase().getId().equals(caseId)) {
+        if (!image.getCaseEntity().getId().equals(caseId)) {
             throw new IllegalArgumentException("Image does not belong to the specified case");
         }
 

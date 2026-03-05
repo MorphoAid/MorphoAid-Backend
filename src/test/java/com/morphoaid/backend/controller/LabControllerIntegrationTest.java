@@ -78,13 +78,12 @@ public class LabControllerIntegrationTest {
                                 .mimeType("image/jpeg")
                                 .checksum("abc123")
                                 .uploadedBy(dataUseUser)
-                                .aCase(analyzedCase)
+                                .caseEntity(analyzedCase)
                                 .build());
 
                 // AIResult references the specific image analyzed (image_id NOT NULL in live
                 // DB)
                 aiResultRepository.save(AIResult.builder()
-                                .caseEntity(analyzedCase)
                                 .caseImage(testImage)
                                 .parasiteStage("RING")
                                 .drugExposure(false)

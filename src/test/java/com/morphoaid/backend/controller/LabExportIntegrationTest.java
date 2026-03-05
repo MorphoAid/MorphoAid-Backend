@@ -95,12 +95,11 @@ public class LabExportIntegrationTest {
                 .mimeType("image/jpeg")
                 .checksum("aabbcc")
                 .uploadedBy(dataUseUser)
-                .aCase(analyzedCase)
+                .caseEntity(analyzedCase)
                 .build());
 
         // AIResult with the image linked
         aiResultRepository.save(AIResult.builder()
-                .caseEntity(analyzedCase)
                 .caseImage(testImage)
                 .parasiteStage("RING")
                 .drugExposure(false)
@@ -122,10 +121,9 @@ public class LabExportIntegrationTest {
                 .mimeType("image/png")
                 .checksum("ddeeff")
                 .uploadedBy(dataUseUser)
-                .aCase(reviewedCase)
+                .caseEntity(reviewedCase)
                 .build());
         aiResultRepository.save(AIResult.builder()
-                .caseEntity(reviewedCase)
                 .caseImage(img2)
                 .parasiteStage("SCHIZ")
                 .drugExposure(false)

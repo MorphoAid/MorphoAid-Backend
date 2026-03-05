@@ -85,7 +85,7 @@ public class CaseService {
         // Resolve the CaseImage entity to attach to AIResult.
         // ai_results.image_id is NOT NULL in the live DB schema, so this is mandatory.
         CaseImage selectedImage = caseImageRepository
-                .findByaCaseIdOrderByCreatedAtDesc(caseId)
+                .findByCaseEntityIdOrderByCreatedAtDesc(caseId)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(
@@ -109,7 +109,7 @@ public class CaseService {
         if (targetCase.getImage() == null) {
             throw new IllegalArgumentException("Case does not have an associated CaseImage to analyze.");
         }
-        aiResult.setImage(targetCase.getImage());
+        aiResult.setCaseImage(targetCase.getImage());
         aiResult.setRawResponseJson(rawResponse);
         // *** Critical: always set caseImage so image_id FK constraint is satisfied ***
         aiResult.setCaseImage(selectedImage);
@@ -155,11 +155,11 @@ public class CaseService {
     }
 
     public Optional<AIResultResponse> getAIResultByCaseId(Long caseId) {
-        return aiResultRepository.findByCaseId(caseId).map(this::toAIResultResponse);
+        return aiResultRepository.findByCaseImageCaseEntityId(caseId).map(this::toAIResultResponse);
     }
 
     public AIResultResponse findAiResultByCaseId(Long caseId) {
-        return aiResultRepository.findByCaseId(caseId)
+        return aiResultRepository.findByCaseImageCaseEntityId(caseId)
                 .map(this::toAIResultResponse)
                 .orElseThrow(() -> new NotFoundException("AI result not found"));
     }
@@ -196,8 +196,8 @@ public class CaseService {
     private AIResultResponse toAIResultResponse(AIResult entity) {
         return AIResultResponse.builder()
                 .id(entity.getId())
-                .caseId(entity.getImage() != null && entity.getImage().getACase() != null
-                        ? entity.getImage().getACase().getId()
+                .caseId(entity.getCaseImage() != null && entity.getCaseImage().getCaseEntity() != null
+                        ? entity.getCaseImage().getCaseEntity().getId()
                         : null)
                 .parasiteStage(entity.getParasiteStage())
                 .drugExposure(entity.getDrugExposure())

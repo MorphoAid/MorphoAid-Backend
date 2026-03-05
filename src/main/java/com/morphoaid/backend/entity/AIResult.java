@@ -22,9 +22,9 @@ public class AIResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "image_id", referencedColumnName = "id", unique = true, nullable = false)
-    private CaseImage image;
+    // @OneToOne
+    // @JoinColumn(name = "image_id", insertable = false, updatable = false)
+    // private CaseImage image;
 
     /**
      * The specific image that was analyzed.

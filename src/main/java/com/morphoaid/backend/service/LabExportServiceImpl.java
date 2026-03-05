@@ -73,7 +73,7 @@ public class LabExportServiceImpl implements LabExportService {
                 Long caseId = aCase.getId();
 
                 // --- AI Result ---
-                Optional<AIResult> aiOpt = aiResultRepository.findByCaseEntityId(caseId);
+                Optional<AIResult> aiOpt = aiResultRepository.findByCaseImageCaseEntityId(caseId);
 
                 // --- Preferred image: AIResult.caseImage if available ---
                 CaseImage chosenImage = null;
@@ -81,7 +81,7 @@ public class LabExportServiceImpl implements LabExportService {
                     chosenImage = aiOpt.get().getCaseImage();
                 } else {
                     // Fallback: first CaseImage for this case (most-recently uploaded first)
-                    chosenImage = caseImageRepository.findByaCaseIdOrderByCreatedAtDesc(caseId)
+                    chosenImage = caseImageRepository.findByCaseEntityIdOrderByCreatedAtDesc(caseId)
                             .stream().findFirst().orElse(null);
                 }
 
