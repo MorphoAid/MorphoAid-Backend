@@ -38,6 +38,11 @@ run.log
 ### Properties ###
 application.properties
 
+# Environment / Secrets - NEVER commit
+.env
+.env.*
+!.env.example
+
 # Logs
 *.log
 

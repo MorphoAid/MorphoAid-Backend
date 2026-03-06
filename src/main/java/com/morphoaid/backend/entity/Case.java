@@ -23,7 +23,7 @@ public class Case {
     private Long id;
 
     @Column(name = "patient_code")
-    private String patientCode;
+    private Long patientCode;
 
     @Column(name = "province_code")
     private String provinceCode;

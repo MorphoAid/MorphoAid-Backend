@@ -17,6 +17,8 @@ import com.morphoaid.backend.integration.ai.UltralyticsClient;
 import com.morphoaid.backend.integration.ai.UltralyticsDetection;
 import com.morphoaid.backend.integration.ai.UltralyticsParser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CaseService {
+    private static final Logger logger = LoggerFactory.getLogger(CaseService.class);
 
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
@@ -39,32 +42,41 @@ public class CaseService {
     private final CaseImageRepository caseImageRepository;
     private final UltralyticsClient ultralyticsClient;
     private final UltralyticsParser ultralyticsParser;
+    private final StorageService storageService;
 
     @Autowired
     public CaseService(CaseRepository caseRepository, UserRepository userRepository,
             AIResultRepository aiResultRepository, CaseImageRepository caseImageRepository,
-            UltralyticsClient ultralyticsClient, UltralyticsParser ultralyticsParser) {
+            UltralyticsClient ultralyticsClient, UltralyticsParser ultralyticsParser,
+            StorageService storageService) {
         this.caseRepository = caseRepository;
         this.userRepository = userRepository;
         this.aiResultRepository = aiResultRepository;
         this.caseImageRepository = caseImageRepository;
         this.ultralyticsClient = ultralyticsClient;
         this.ultralyticsParser = ultralyticsParser;
+        this.storageService = storageService;
     }
 
     @Transactional
-    public CaseResponse createCase(String patientCode, String imagePath, String technicianId, String location,
+    public CaseResponse createCase(Long patientCode, String imagePath, String technicianId, String location,
             Long uploaderId) {
         // 1. ค้นหา User จาก uploaderId ที่ส่งมา
         User uploadedBy = userRepository.findById(uploaderId)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + uploaderId));
 
         // 2. เมื่อมั่นใจว่ามี User แน่นอน ค่อยสร้าง Case
+        String provinceCode = com.morphoaid.backend.constant.ProvinceConstant.getProvinceCode(location);
+        Long finalPatientCode = (patientCode != null) ? patientCode : this.getNextPatientCode();
+
         Case newCase = Case.builder()
-                .patientCode(patientCode)
+                .patientCode(finalPatientCode)
                 .imagePath(imagePath)
                 .technicianId(technicianId)
-                .location(location)
+                // location field is deprecated but we keep it null or fallback
+                .location(null)
+                .provinceName(location)
+                .provinceCode(provinceCode)
                 .uploadedBy(uploadedBy)
                 .build();
 
@@ -78,41 +90,56 @@ public class CaseService {
         Case targetCase = caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found with id: " + caseId));
 
-        if (targetCase.getImage() == null) {
-            throw new IllegalArgumentException("Case has no image. Upload image before requesting analysis.");
+        // Validate image path exists on the Case
+        String imagePath = targetCase.getImagePath();
+        if (imagePath == null || imagePath.isBlank()) {
+            throw new IllegalArgumentException("Case has no image path. Upload image before requesting analysis.");
         }
 
-        // Resolve the CaseImage entity to attach to AIResult.
-        // ai_results.image_id is NOT NULL in the live DB schema, so this is mandatory.
-        CaseImage selectedImage = caseImageRepository
-                .findByCaseEntityIdOrderByCreatedAtDesc(caseId)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "Case has no CaseImage; cannot analyze (caseId=" + caseId + ")"));
+        // Resolve the CaseImage entity from DB (needed for ai_results.image_id FK)
+        List<CaseImage> images = caseImageRepository.findByCaseEntityIdOrderByCreatedAtDesc(caseId);
+        if (images.isEmpty()) {
+            logger.error("No CaseImage record found in DB for case ID: {}. Upload image first.", caseId);
+            throw new IllegalArgumentException("Case has no CaseImage; cannot analyze (caseId=" + caseId + ")");
+        }
+        CaseImage selectedImage = images.get(0);
+        logger.info("Using CaseImage ID: {} for analysis of case: {}", selectedImage.getId(), caseId);
 
+        // Read the image file from disk or fallback to S3
         byte[] imageBytes;
-        try {
-            Path path = Paths.get(targetCase.getImagePath());
-            imageBytes = Files.readAllBytes(path);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to read image file from path: " + targetCase.getImagePath(), e);
+        Path path = Paths.get(imagePath);
+        if (Files.exists(path)) {
+            try {
+                imageBytes = Files.readAllBytes(path);
+                logger.info("Read {} bytes from image file: {}", imageBytes.length, imagePath);
+            } catch (IOException e) {
+                logger.warn("Failed to read image file from disk: {}. Falling back to S3.", imagePath);
+                imageBytes = downloadFromStorage(caseId, selectedImage.getId());
+            }
+        } else {
+            logger.info("Image file not found on disk: {}. Fetching from storage.", imagePath);
+            imageBytes = downloadFromStorage(caseId, selectedImage.getId());
         }
 
-        // Call the AI model
-        String rawResponse = ultralyticsClient.predict(imageBytes, targetCase.getImagePath());
+        // Call the AI model (has fallback to mock if API fails)
+        logger.info("Calling Ultralytics for Case ID: {}", caseId);
+        String rawResponse = ultralyticsClient.predict(imageBytes, imagePath);
+        logger.info("AI response received (length: {})", rawResponse != null ? rawResponse.length() : 0);
 
-        // Parse + map the result
-        Optional<UltralyticsDetection> detectionOpt = ultralyticsParser.parseTopDetection(rawResponse);
+        // Parse + map the top detection
+        Optional<UltralyticsDetection> detectionOpt;
+        try {
+            detectionOpt = ultralyticsParser.parseTopDetection(rawResponse);
+            logger.info("Parsing successful. Detection optional present: {}", detectionOpt.isPresent());
+        } catch (Exception e) {
+            logger.error("Parsing failed for response: {}", rawResponse);
+            throw e;
+        }
 
         AIResult aiResult = new AIResult();
-        if (targetCase.getImage() == null) {
-            throw new IllegalArgumentException("Case does not have an associated CaseImage to analyze.");
-        }
-        aiResult.setCaseImage(targetCase.getImage());
-        aiResult.setRawResponseJson(rawResponse);
-        // *** Critical: always set caseImage so image_id FK constraint is satisfied ***
         aiResult.setCaseImage(selectedImage);
+        aiResult.setCaseEntity(targetCase);
+        aiResult.setRawResponseJson(rawResponse);
 
         if (detectionOpt.isPresent()) {
             UltralyticsDetection detection = detectionOpt.get();
@@ -121,14 +148,22 @@ public class CaseService {
             aiResult.setDrugType(detection.drugType());
             aiResult.setParasiteStage(detection.parasiteStage());
             aiResult.setTopClassId(detection.topClassId());
+            logger.info("Detection mapping: class={}, conf={}", detection.topClassId(), detection.confidence());
         } else {
-            // No detections
             aiResult.setConfidence(0.0);
             aiResult.setDrugExposure(false);
+            logger.info("No detections found in response.");
         }
 
-        // Save AI Result (image_id will now always be set)
-        aiResult = aiResultRepository.save(aiResult);
+        // Save AI Result
+        try {
+            logger.info("Saving AI Result to DB (image_id={})...", selectedImage.getId());
+            aiResult = aiResultRepository.save(aiResult);
+            logger.info("AI Result saved successfully with ID: {}", aiResult.getId());
+        } catch (Exception e) {
+            logger.error("Failed to save AI Result: {} - {}", e.getClass().getSimpleName(), e.getMessage());
+            throw e;
+        }
 
         // Update Case status
         targetCase.setStatus(CaseStatus.ANALYZED);
@@ -137,17 +172,43 @@ public class CaseService {
         return toAIResultResponse(aiResult);
     }
 
-    public List<CaseResponse> getCases() {
-        return caseRepository.findAllByOrderByIdDesc()
-                .stream()
+    @Transactional(readOnly = true)
+    public List<CaseResponse> getCases(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + userEmail));
+
+        logger.info("Fetching cases for user: {} (ID: {}), role: {}", userEmail, user.getId(), user.getRole());
+        List<Case> cases;
+        if (user.getRole() == Role.ADMIN) {
+            cases = caseRepository.findAllByOrderByIdDesc();
+            logger.info("Admin user fetching all {} cases", cases.size());
+        } else {
+            cases = caseRepository.findAllByUploadedByOrderByIdDesc(user);
+            long totalSystemCases = caseRepository.count();
+            logger.info(
+                    "User {} (ID: {}) fetching their own {} cases (out of {} total system cases). User object UID: {}",
+                    userEmail, user.getId(), cases.size(), totalSystemCases, user.getEmail());
+            if (cases.isEmpty()) {
+                logger.warn(
+                        "No cases found for user: {} (ID: {}). Possible ID mismatch or database data missing 'uploaded_by' link.",
+                        userEmail, user.getId());
+            }
+        }
+
+        return cases.stream()
                 .map(this::toCaseResponse)
                 .collect(Collectors.toList());
+    }
+
+    public Long getNextPatientCode() {
+        return caseRepository.findMaxPatientCode().orElse(0L) + 1;
     }
 
     public Optional<CaseResponse> getCaseById(Long id) {
         return caseRepository.findById(id).map(this::toCaseResponse);
     }
 
+    @Transactional(readOnly = true)
     public CaseResponse getCaseOrThrow(Long id) {
         return caseRepository.findById(id)
                 .map(this::toCaseResponse)
@@ -181,13 +242,34 @@ public class CaseService {
     }
 
     private CaseResponse toCaseResponse(Case entity) {
+        CaseImage image = entity.getImage();
+
+        // Robust check: Hibernate @OneToOne lazy loading on the non-owning side (Case)
+        // often returns null even if a record exists in case_images.
+        if (image == null && entity.getId() != null) {
+            List<CaseImage> images = caseImageRepository.findByCaseEntityIdOrderByCreatedAtDesc(entity.getId());
+            if (!images.isEmpty()) {
+                image = images.get(0);
+            }
+        }
+
+        if (image != null) {
+            logger.debug("Mapping DTO for Case {}: Image ID={}, Original Filename={}",
+                    entity.getId(), image.getId(), image.getOriginalFilename());
+        } else {
+            logger.debug("Mapping DTO for Case {}: No image associated.", entity.getId());
+        }
+
         return CaseResponse.builder()
                 .id(entity.getId())
                 .patientCode(entity.getPatientCode())
                 .technicianId(entity.getTechnicianId())
                 .location(entity.getLocation())
                 .status(entity.getStatus() != null ? entity.getStatus().name() : null)
+                .analysisStatus(entity.getAnalysisStatus() != null ? entity.getAnalysisStatus().name() : null)
                 .imagePath(entity.getImagePath())
+                .imageId(image != null ? image.getId() : null)
+                .imageFilename(image != null ? image.getOriginalFilename() : null)
                 .createdAt(entity.getCreatedAt())
                 .uploadedById(entity.getUploadedBy() != null ? entity.getUploadedBy().getId() : null)
                 .build();
@@ -207,5 +289,14 @@ public class CaseService {
                 .rawResponseJson(entity.getRawResponseJson())
                 .createdAt(entity.getCreatedAt())
                 .build();
+    }
+
+    private byte[] downloadFromStorage(Long caseId, Long imageId) {
+        try (java.io.InputStream s3Is = storageService.downloadImageContent(caseId, imageId)) {
+            return s3Is.readAllBytes();
+        } catch (Exception e) {
+            logger.error("Failed to download image from storage for case {}: {}", caseId, e.getMessage());
+            throw new IllegalArgumentException("Image file not found and could not be retrieved from storage", e);
+        }
     }
 }

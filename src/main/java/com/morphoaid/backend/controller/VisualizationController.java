@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/visualization")
+@RequestMapping("/visualization")
 @RequiredArgsConstructor
 public class VisualizationController {
 

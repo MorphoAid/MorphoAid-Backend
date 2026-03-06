@@ -35,6 +35,10 @@ public class AIResult {
     @JoinColumn(name = "image_id", nullable = true)
     private CaseImage caseImage;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "case_id", nullable = false)
+    private Case caseEntity;
+
     @Column(name = "parasite_stage")
     private String parasiteStage;
 

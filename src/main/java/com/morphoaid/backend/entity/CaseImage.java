@@ -34,6 +34,9 @@ public class CaseImage {
     @Column(name = "mime_type", nullable = false)
     private String mimeType;
 
+    @Column(name = "original_filename")
+    private String originalFilename;
+
     @Column
     private String checksum;
 

@@ -86,7 +86,7 @@ public class AIIntegrationTest {
 
                 // 3. สร้าง Case
                 Case testCase = Case.builder()
-                                .patientCode("TEST-AI-01")
+                                .patientCode(1L)
                                 .location("Testing Lab")
                                 .technicianId("TECH-01")
                                 .imagePath(tempImageFile.getAbsolutePath())
@@ -123,13 +123,13 @@ public class AIIntegrationTest {
                                 .thenReturn(mockResponseJson);
 
                 // Act
-                ResponseEntity<AIResultResponse> response = caseController.analyzeCase(savedCaseId);
+                ResponseEntity<?> response = caseController.analyzeCase(savedCaseId);
 
                 // Assert
                 assertTrue(response.getStatusCode().is2xxSuccessful());
                 assertNotNull(response.getBody());
 
-                AIResultResponse aiResult = response.getBody();
+                AIResultResponse aiResult = (AIResultResponse) response.getBody();
                 assertEquals(0.88, aiResult.getConfidence());
                 assertTrue(aiResult.getDrugExposure());
                 assertEquals("A", aiResult.getDrugType());

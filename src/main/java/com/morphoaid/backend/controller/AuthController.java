@@ -35,6 +35,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterDataUseRequest request) {
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            request.setUsername("u" + java.util.UUID.randomUUID().toString().substring(0, 8));
+        }
+
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             return buildValidationError("confirmPassword", "Passwords do not match");
         }
@@ -61,6 +65,10 @@ public class AuthController {
 
     @PostMapping("/register/dataprep")
     public ResponseEntity<?> registerDataPrep(@RequestBody @Valid RegisterDataPrepRequest request) {
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            request.setUsername("u" + java.util.UUID.randomUUID().toString().substring(0, 8));
+        }
+
         try {
             tokenService.validateToken(request.getInvitationToken());
         } catch (IllegalArgumentException e) {
@@ -127,6 +135,9 @@ public class AuthController {
         UserSummary summary = UserSummary.builder()
                 .id(user.getId())
                 .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .fullName(user.getFullName())
                 .role(user.getRole())
                 .build();
 
@@ -154,6 +165,9 @@ public class AuthController {
         UserSummary summary = UserSummary.builder()
                 .id(user.getId())
                 .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .fullName(user.getFullName())
                 .role(user.getRole())
                 .build();
 

@@ -9,8 +9,6 @@ import lombok.Data;
 
 @Data
 public class RegisterDataUseRequest {
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 10, message = "Username must be between 3 and 10 characters")
     private String username;
 
     @NotBlank(message = "First name is required")

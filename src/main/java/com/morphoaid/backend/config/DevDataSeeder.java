@@ -97,7 +97,7 @@ public class DevDataSeeder implements CommandLineRunner {
                 if (caseRepository.count() == 0) {
 
                         Case case1 = Case.builder()
-                                        .patientCode("PT-1001")
+                                        .patientCode(1001L)
                                         .technicianId("TECH-A1")
                                         .location("Zone 1 Rural Clinic")
                                         .status(CaseStatus.ANALYZED)
@@ -106,7 +106,7 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .build();
 
                         Case case2 = Case.builder()
-                                        .patientCode("PT-1002")
+                                        .patientCode(1002L)
                                         .technicianId("TECH-B2")
                                         .location("City Hospital")
                                         .status(CaseStatus.PENDING)
@@ -115,7 +115,7 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .build();
 
                         Case case3 = Case.builder()
-                                        .patientCode("PT-1003")
+                                        .patientCode(1003L)
                                         .technicianId("TECH-A1")
                                         .location("Zone 1 Rural Clinic")
                                         .status(CaseStatus.REVIEWED)
@@ -124,7 +124,7 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .build();
 
                         Case case4 = Case.builder()
-                                        .patientCode("PT-2044")
+                                        .patientCode(2044L)
                                         .technicianId("TECH-C3")
                                         .location("Mobile Unit North")
                                         .status(CaseStatus.PENDING)
@@ -133,7 +133,7 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .build();
 
                         Case case5 = Case.builder()
-                                        .patientCode("PT-3099")
+                                        .patientCode(3099L)
                                         .technicianId("TECH-D4")
                                         .location("Central Lab")
                                         .status(CaseStatus.PENDING)

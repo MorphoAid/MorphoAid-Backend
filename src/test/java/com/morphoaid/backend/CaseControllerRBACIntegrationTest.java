@@ -37,7 +37,7 @@ public class CaseControllerRBACIntegrationTest {
         aiResultRepository.deleteAll();
         caseRepository.deleteAll();
         Case sampleCase = Case.builder()
-                .patientCode("P001")
+                .patientCode(1L)
                 .status(CaseStatus.PENDING)
                 .imagePath("test-image.jpg")
                 .build();

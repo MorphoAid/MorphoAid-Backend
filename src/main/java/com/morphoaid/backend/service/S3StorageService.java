@@ -45,6 +45,9 @@ public class S3StorageService implements StorageService {
     @Value("${app.storage.allowed-mimes}")
     private String allowedMimes;
 
+    @Value("${aws.s3.access-key}")
+    private String awsAccessKey;
+
     @Autowired
     public S3StorageService(S3Client s3Client, CaseImageRepository caseImageRepository, CaseRepository caseRepository) {
         this.s3Client = s3Client;
@@ -53,6 +56,7 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public CaseImage uploadCaseImage(Long caseId, MultipartFile file, User uploader) {
         // Validate MIME
         List<String> validMimes = Arrays.asList(allowedMimes.split(","));
@@ -90,16 +94,22 @@ public class S3StorageService implements StorageService {
             }
             String checksum = hexString.toString();
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(objectKey)
-                    .contentType(file.getContentType())
-                    .serverSideEncryption(ServerSideEncryption.AES256)
-                    .build();
+            if ("mock-access-key".equals(awsAccessKey)) {
+                logger.info("Mock AWS credentials detected. Skipping actual S3 putObject for bucket: {}, Key: {}",
+                        bucket, objectKey);
+            } else {
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(objectKey)
+                        .contentType(file.getContentType())
+                        .serverSideEncryption(ServerSideEncryption.AES256)
+                        .build();
 
-            logger.info("Attempting S3 Upload -> Bucket: {}, Key: {}", bucket, objectKey);
-            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-            logger.info("SUCCESS: Object securely uploaded to S3 -> Key: {}", objectKey);
+                logger.info("Attempting S3 Upload -> Bucket: {}, Key: {}", bucket, objectKey);
+                s3Client.putObject(putObjectRequest,
+                        RequestBody.fromBytes(file.getBytes()));
+                logger.info("SUCCESS: Object securely uploaded to S3 -> Key: {}", objectKey);
+            }
 
             String oldKey = null;
             String oldBucket = null;
@@ -115,13 +125,23 @@ public class S3StorageService implements StorageService {
                     .objectKey(objectKey)
                     .size(file.getSize())
                     .mimeType(file.getContentType())
+                    .originalFilename(file.getOriginalFilename())
                     .checksum(checksum)
                     .uploadedBy(uploader)
                     .caseEntity(aCase)
                     .build();
 
+            // Save CaseImage explicitly
+            caseImageRepository.save(caseImage);
+
             aCase.replaceImage(caseImage);
-            Case updatedCase = caseRepository.save(aCase);
+            aCase.setImagePath(objectKey); // Ensure cases table column is updated
+
+            // Force flush to ensure associations are committed before returning
+            Case updatedCase = caseRepository.saveAndFlush(aCase);
+
+            logger.info("Attachment link confirmed for Case ID: {} and CaseImage ID: {}. Original Filename: {}",
+                    aCase.getId(), caseImage.getId(), caseImage.getOriginalFilename());
 
             if (oldKey != null && !oldKey.equals(objectKey)) {
                 try {

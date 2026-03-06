@@ -41,12 +41,12 @@ public class CaseController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
-    public ResponseEntity<CaseResponse> uploadCase(
-            @RequestParam("patientCode") String patientCode,
+    public ResponseEntity<?> uploadCase(
+            @RequestParam("patientCode") Long patientCode,
             @RequestParam("technicianId") String technicianId,
             @RequestParam(value = "location", required = false) String location,
-            @RequestParam("uploaderId") Long uploaderId,
-            @RequestParam("image") MultipartFile image) {
+            @RequestParam("image") MultipartFile image,
+            java.security.Principal principal) {
 
         // Validate image
         if (image == null || image.isEmpty()) {
@@ -75,23 +75,37 @@ public class CaseController {
 
             String safeFilename = UUID.randomUUID() + "-" + image.getOriginalFilename();
             java.io.File destFile = new java.io.File(destDir, safeFilename);
-            image.transferTo(destFile);
+
+            // Read bytes to avoid irreversibly consuming the file stream beforehand
+            byte[] fileBytes = image.getBytes();
+            java.nio.file.Files.write(destFile.toPath(), fileBytes);
 
             String realImagePath = destFile.getAbsolutePath();
 
+            User uploader = userRepository.findByEmail(principal.getName())
+                    .orElseThrow(() -> new IllegalArgumentException("Uploader not found"));
+
             // Call caseService.createCase (now returns DTO)
             CaseResponse newCase = caseService.createCase(patientCode, realImagePath, technicianId, location,
-                    uploaderId);
+                    uploader.getId());
 
-            logger.info("Created new case with ID: {}", newCase.getId());
+            // Upload to S3 to create the CaseImage record for AI analysis requirement
+            storageService.uploadCaseImage(newCase.getId(), image, uploader);
 
-            // Return DTO directly
-            return ResponseEntity.ok(newCase);
+            // Fetch the updated CaseResponse with image details
+            CaseResponse updatedCase = caseService.getCaseOrThrow(newCase.getId());
+
+            logger.info("Created new case with ID: {}", updatedCase.getId());
+
+            // Return latest DTO
+            return ResponseEntity.ok(updatedCase);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            logger.error("Error creating case", e);
-            return ResponseEntity.internalServerError().build();
+            logger.error("Error creating case: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(java.util.Map.of(
+                    "message", "Error creating case: " + e.getMessage(),
+                    "type", e.getClass().getSimpleName()));
         }
     }
 
@@ -116,9 +130,12 @@ public class CaseController {
             User uploader = userRepository.findByEmail(principal.getName())
                     .orElseThrow(() -> new IllegalArgumentException("Uploader not found"));
 
-            var caseImage = storageService.uploadCaseImage(caseId, image, uploader);
+            storageService.uploadCaseImage(caseId, image, uploader);
 
-            return ResponseEntity.ok().body(caseImage);
+            // Return the updated CaseResponse instead of just the CaseImage
+            // This ensures the frontend gets the imageId and imageFilename immediately
+            CaseResponse updatedCase = caseService.getCaseOrThrow(caseId);
+            return ResponseEntity.ok().body(updatedCase);
 
         } catch (org.springframework.security.access.AccessDeniedException e) {
             return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
@@ -161,8 +178,19 @@ public class CaseController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
-    public ResponseEntity<List<CaseResponse>> getAllCases() {
-        return ResponseEntity.ok(caseService.getCases());
+    public ResponseEntity<List<CaseResponse>> getAllCases(java.security.Principal principal) {
+        if (principal == null) {
+            logger.error("getAllCases called with null principal");
+            return ResponseEntity.status(401).build();
+        }
+        logger.info("getAllCases requested by principal: {}", principal.getName());
+        return ResponseEntity.ok(caseService.getCases(principal.getName()));
+    }
+
+    @GetMapping("/next-patient-code")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
+    public ResponseEntity<Long> getNextPatientCode() {
+        return ResponseEntity.ok(caseService.getNextPatientCode());
     }
 
     @GetMapping("/{id}")
@@ -179,18 +207,25 @@ public class CaseController {
 
     @PostMapping("/{id}/analyze")
     @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
-    public ResponseEntity<AIResultResponse> analyzeCase(@PathVariable Long id) {
+    public ResponseEntity<?> analyzeCase(@PathVariable Long id) {
         try {
             AIResultResponse result = caseService.analyzeCase(id);
             return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            logger.error("Analysis failed due to missing image: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            logger.error("Analysis pre-condition failed for case {}: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(java.util.Map.of(
+                    "message", e.getMessage(),
+                    "type", e.getClass().getSimpleName()));
         } catch (com.morphoaid.backend.exception.NotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(java.util.Map.of(
+                    "message", e.getMessage(),
+                    "type", "NotFoundException"));
         } catch (Exception e) {
-            logger.error("AI Analysis failed for case {}: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(502).build(); // 502 Bad Gateway for upstream AI failure
+            logger.error("AI Analysis critical failure for case {}: {} - {}", id, e.getClass().getSimpleName(),
+                    e.getMessage(), e);
+            return ResponseEntity.status(502).body(java.util.Map.of(
+                    "message", "Critical failure: " + e.getMessage(),
+                    "type", e.getClass().getSimpleName()));
         }
     }
 }

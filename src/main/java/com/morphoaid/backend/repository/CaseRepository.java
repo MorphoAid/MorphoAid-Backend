@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface CaseRepository extends JpaRepository<Case, Long> {
     List<Case> findAllByOrderByIdDesc();
 
+    List<Case> findAllByUploadedByOrderByIdDesc(com.morphoaid.backend.entity.User user);
+
     /** Lab review: returns only ANALYZED cases. */
     List<Case> findByStatusOrderByCreatedAtDesc(CaseStatus status);
 
@@ -20,4 +22,16 @@ public interface CaseRepository extends JpaRepository<Case, Long> {
 
     /** Lab export: batch-fetch ANALYZED + REVIEWED cases, newest first. */
     List<Case> findByStatusInOrderByCreatedAtDesc(List<CaseStatus> statuses);
+
+    @org.springframework.data.jpa.repository.Query("SELECT MAX(c.patientCode) FROM Case c")
+    Optional<Long> findMaxPatientCode();
+
+    @org.springframework.data.jpa.repository.Query("SELECT c.provinceName, COUNT(c) FROM Case c WHERE c.provinceName IS NOT NULL GROUP BY c.provinceName")
+    List<Object[]> countCasesByProvinceName();
+
+    @org.springframework.data.jpa.repository.Query("SELECT c.id, c.provinceCode, c.provinceName, c.location, ai.parasiteStage "
+            +
+            "FROM Case c " +
+            "LEFT JOIN AIResult ai ON ai.caseEntity.id = c.id")
+    List<Object[]> findRawCasesForHeatmap();
 }
