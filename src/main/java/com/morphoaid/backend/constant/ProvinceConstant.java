@@ -7,7 +7,7 @@ public class ProvinceConstant {
 
     public static final String[][] PROVINCES = {
             { "Amnat Charoen", "อำนาจเจริญ", "37" }, { "Ang Thong", "อ่างทอง", "15" },
-            { "Bangkok", "กรุงเทพมหานคร", "10" },
+            { "Bangkok Metropolis", "กรุงเทพมหานคร", "10" },
             { "Bueng Kan", "บึงกาฬ", "38" }, { "Buri Ram", "บุรีรัมย์", "31" }, { "Chachoengsao", "ฉะเชิงเทรา", "24" },
             { "Chai Nat", "ชัยนาท", "18" }, { "Chaiyaphum", "ชัยภูมิ", "36" }, { "Chanthaburi", "จันทบุรี", "22" },
             { "Chiang Mai", "เชียงใหม่", "50" }, { "Chiang Rai", "เชียงราย", "57" }, { "Chon Buri", "ชลบุรี", "20" },

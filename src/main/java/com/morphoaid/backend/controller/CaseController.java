@@ -228,4 +228,20 @@ public class CaseController {
                     "type", e.getClass().getSimpleName()));
         }
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
+    public ResponseEntity<Void> deleteCase(@PathVariable Long id, java.security.Principal principal) {
+        try {
+            caseService.deleteCase(id, principal.getName());
+            return ResponseEntity.noContent().build();
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        } catch (com.morphoaid.backend.exception.NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("Error deleting case {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

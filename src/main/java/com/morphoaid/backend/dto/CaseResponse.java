@@ -11,6 +11,8 @@ public class CaseResponse {
     private Long patientCode;
     private String technicianId;
     private String location;
+    private String provinceCode;
+    private String provinceName;
     private String status;
     private String analysisStatus;
     private String imagePath; // TODO: Expose a single CaseImage object when frontend allows

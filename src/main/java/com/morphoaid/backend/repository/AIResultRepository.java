@@ -15,4 +15,6 @@ public interface AIResultRepository extends JpaRepository<AIResult, Long> {
     Optional<AIResult> findByCaseEntityId(@Param("caseId") Long caseId);
 
     Optional<AIResult> findByCaseImageCaseEntityId(Long caseId);
+
+    void deleteByCaseEntityId(Long caseId);
 }

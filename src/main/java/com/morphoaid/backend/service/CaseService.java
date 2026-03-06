@@ -241,6 +241,18 @@ public class CaseService {
         }
     }
 
+    @Transactional
+    public void deleteCase(Long caseId, String userEmail) {
+        verifyCaseAccess(caseId, userEmail);
+
+        // Delete AI results first (no cascade from Case → AIResult)
+        aiResultRepository.deleteByCaseEntityId(caseId);
+
+        // Delete the case (cascades to CaseImage and CaseNote)
+        caseRepository.deleteById(caseId);
+        logger.info("Deleted case with ID: {} by user: {}", caseId, userEmail);
+    }
+
     private CaseResponse toCaseResponse(Case entity) {
         CaseImage image = entity.getImage();
 
@@ -265,6 +277,8 @@ public class CaseService {
                 .patientCode(entity.getPatientCode())
                 .technicianId(entity.getTechnicianId())
                 .location(entity.getLocation())
+                .provinceCode(entity.getProvinceCode())
+                .provinceName(entity.getProvinceName())
                 .status(entity.getStatus() != null ? entity.getStatus().name() : null)
                 .analysisStatus(entity.getAnalysisStatus() != null ? entity.getAnalysisStatus().name() : null)
                 .imagePath(entity.getImagePath())
