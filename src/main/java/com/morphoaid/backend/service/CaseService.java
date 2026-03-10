@@ -13,6 +13,7 @@ import com.morphoaid.backend.repository.CaseImageRepository;
 import com.morphoaid.backend.repository.CaseRepository;
 import com.morphoaid.backend.repository.UserRepository;
 import com.morphoaid.backend.entity.CaseStatus;
+import com.morphoaid.backend.entity.AnalysisStatus;
 import com.morphoaid.backend.integration.ai.UltralyticsClient;
 import com.morphoaid.backend.integration.ai.UltralyticsDetection;
 import com.morphoaid.backend.integration.ai.UltralyticsParser;
@@ -90,6 +91,10 @@ public class CaseService {
         Case targetCase = caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found with id: " + caseId));
 
+        // Mark analysis as PROCESSING immediately
+        targetCase.setAnalysisStatus(AnalysisStatus.PROCESSING);
+        caseRepository.save(targetCase);
+
         // Validate image path exists on the Case
         String imagePath = targetCase.getImagePath();
         if (imagePath == null || imagePath.isBlank()) {
@@ -162,11 +167,14 @@ public class CaseService {
             logger.info("AI Result saved successfully with ID: {}", aiResult.getId());
         } catch (Exception e) {
             logger.error("Failed to save AI Result: {} - {}", e.getClass().getSimpleName(), e.getMessage());
+            targetCase.setAnalysisStatus(AnalysisStatus.FAILED);
+            caseRepository.save(targetCase);
             throw e;
         }
 
         // Update Case status
         targetCase.setStatus(CaseStatus.ANALYZED);
+        targetCase.setAnalysisStatus(AnalysisStatus.COMPLETED);
         caseRepository.save(targetCase);
 
         return toAIResultResponse(aiResult);
