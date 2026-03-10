@@ -202,7 +202,8 @@ public class CaseController {
     @GetMapping("/{id}/ai-result")
     @PreAuthorize("hasAnyRole('DATA_USE', 'DATA_PREP', 'ADMIN')")
     public ResponseEntity<AIResultResponse> getAIResultByCaseId(@PathVariable Long id) {
-        return ResponseEntity.ok(caseService.findAiResultByCaseId(id));
+        AIResultResponse result = caseService.findAiResultByCaseIdOrNull(id);
+        return ResponseEntity.ok(result); // returns 200 with null body if no result
     }
 
     @PostMapping("/{id}/analyze")

@@ -233,6 +233,12 @@ public class CaseService {
                 .orElseThrow(() -> new NotFoundException("AI result not found"));
     }
 
+    public AIResultResponse findAiResultByCaseIdOrNull(Long caseId) {
+        return aiResultRepository.findByCaseImageCaseEntityId(caseId)
+                .map(this::toAIResultResponse)
+                .orElse(null);
+    }
+
     public void verifyCaseAccess(Long caseId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -321,4 +327,5 @@ public class CaseService {
             throw new IllegalArgumentException("Image file not found and could not be retrieved from storage", e);
         }
     }
+
 }
