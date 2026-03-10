@@ -141,7 +141,10 @@ public class CaseService {
             throw e;
         }
 
-        AIResult aiResult = new AIResult();
+        // Re-use existing AI result if present (prevents duplicate key constraint
+        // violation)
+        AIResult aiResult = aiResultRepository.findByCaseImageCaseEntityId(caseId)
+                .orElse(new AIResult());
         aiResult.setCaseImage(selectedImage);
         aiResult.setCaseEntity(targetCase);
         aiResult.setRawResponseJson(rawResponse);
