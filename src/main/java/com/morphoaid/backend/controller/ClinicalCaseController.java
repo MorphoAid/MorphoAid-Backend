@@ -2,6 +2,7 @@ package com.morphoaid.backend.controller;
 
 import com.morphoaid.backend.dto.CaseNoteResponse;
 import com.morphoaid.backend.dto.ClinicalCaseResponse;
+import com.morphoaid.backend.dto.UpdatePatientInfoRequest;
 import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.repository.UserRepository;
 import com.morphoaid.backend.service.ClinicalCaseService;
@@ -61,11 +62,6 @@ public class ClinicalCaseController {
             return ResponseEntity.badRequest().body(Map.of("message", "Only JPG/PNG files are allowed."));
         }
 
-        if (Boolean.FALSE.equals(consent) && patientMetadata != null && !patientMetadata.isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Patient consent is required to store patient metadata."));
-        }
-
         try {
             User currentUser = getCurrentUser(principal);
             ClinicalCaseResponse response = clinicalCaseService.uploadCase(image, provinceCode, provinceName, consent,
@@ -88,6 +84,26 @@ public class ClinicalCaseController {
     public ResponseEntity<ClinicalCaseResponse> getCaseById(@PathVariable Long id, Principal principal) {
         User currentUser = getCurrentUser(principal);
         return ResponseEntity.ok(clinicalCaseService.getCaseById(id, currentUser));
+    }
+
+    @PatchMapping("/cases/{id}/patient-info")
+    @PreAuthorize("hasRole('DATA_USE')")
+    public ResponseEntity<?> updatePatientInfo(
+            @PathVariable Long id,
+            @RequestBody UpdatePatientInfoRequest request,
+            Principal principal) {
+        try {
+            User currentUser = getCurrentUser(principal);
+            ClinicalCaseResponse response = clinicalCaseService.updatePatientInfo(id, request, currentUser);
+            return ResponseEntity.ok(Map.of("message", "Patient info updated successfully", "data", response));
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            throw e;
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Error updating patient info for case {}", id, e);
+            return ResponseEntity.internalServerError().body(Map.of("message", "Error updating patient info."));
+        }
     }
 
     @PostMapping("/cases/{id}/notes")

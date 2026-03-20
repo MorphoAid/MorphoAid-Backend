@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ClinicalCaseResponse {
     private Long id;
+    private Long patientCode;
     private String status;
     private String analysisStatus;
     private Long imageId;

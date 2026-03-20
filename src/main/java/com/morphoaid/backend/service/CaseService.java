@@ -296,6 +296,7 @@ public class CaseService {
                 .location(entity.getLocation())
                 .provinceCode(entity.getProvinceCode())
                 .provinceName(entity.getProvinceName())
+                .patientMetadata(entity.getPatientMetadata())
                 .status(entity.getStatus() != null ? entity.getStatus().name() : null)
                 .analysisStatus(entity.getAnalysisStatus() != null ? entity.getAnalysisStatus().name() : null)
                 .imagePath(entity.getImagePath())

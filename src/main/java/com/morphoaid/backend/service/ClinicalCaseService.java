@@ -2,6 +2,7 @@ package com.morphoaid.backend.service;
 
 import com.morphoaid.backend.dto.CaseNoteResponse;
 import com.morphoaid.backend.dto.ClinicalCaseResponse;
+import com.morphoaid.backend.dto.UpdatePatientInfoRequest;
 import com.morphoaid.backend.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.OutputStream;
@@ -12,6 +13,8 @@ public interface ClinicalCaseService {
             Boolean consent, String patientMetadata, User uploader);
 
     ClinicalCaseResponse getCaseById(Long id, User currentUser);
+
+    ClinicalCaseResponse updatePatientInfo(Long caseId, UpdatePatientInfoRequest request, User currentUser);
 
     CaseNoteResponse addNote(Long caseId, String note, User author);
 

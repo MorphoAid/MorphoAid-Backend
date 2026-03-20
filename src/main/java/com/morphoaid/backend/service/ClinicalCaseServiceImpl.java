@@ -4,6 +4,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import com.morphoaid.backend.dto.CaseNoteResponse;
 import com.morphoaid.backend.dto.ClinicalCaseResponse;
+import com.morphoaid.backend.dto.UpdatePatientInfoRequest;
 import com.morphoaid.backend.entity.*;
 import com.morphoaid.backend.exception.NotFoundException;
 import com.morphoaid.backend.integration.ai.UltralyticsClient;
@@ -58,16 +59,13 @@ public class ClinicalCaseServiceImpl implements ClinicalCaseService {
         // Validation moved to Controller for exact messages, but double check here
         if (image == null || image.isEmpty())
             throw new IllegalArgumentException("Image is required.");
-        if (Boolean.FALSE.equals(consent) && patientMetadata != null && !patientMetadata.isBlank()) {
-            throw new IllegalArgumentException("Patient consent is required to store patient metadata.");
-        }
 
         // 1. Persist Case first to get caseId
         Case aCase = Case.builder()
                 .provinceCode(provinceCode)
                 .provinceName(provinceName)
                 .consent(consent)
-                .patientMetadata(consent ? patientMetadata : null)
+                .patientMetadata(patientMetadata)
                 .status(CaseStatus.PENDING)
                 .analysisStatus(AnalysisStatus.PENDING)
                 .uploadedBy(uploader)
@@ -145,6 +143,26 @@ public class ClinicalCaseServiceImpl implements ClinicalCaseService {
 
     @Override
     @Transactional
+    public ClinicalCaseResponse updatePatientInfo(Long caseId, UpdatePatientInfoRequest request, User currentUser) {
+        Case aCase = caseRepository.findById(caseId)
+                .orElseThrow(() -> new NotFoundException("Case not found"));
+
+        verifyOwner(aCase, currentUser);
+
+        if (request.getPatientCode() != null) {
+            aCase.setPatientCode(request.getPatientCode());
+        }
+
+        if (request.getPatientMetadata() != null) {
+            aCase.setPatientMetadata(request.getPatientMetadata());
+        }
+
+        aCase = caseRepository.save(aCase);
+        return toClinicalResponse(aCase);
+    }
+
+    @Override
+    @Transactional
     public CaseNoteResponse addNote(Long caseId, String note, User author) {
         Case aCase = caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found"));
@@ -201,7 +219,7 @@ public class ClinicalCaseServiceImpl implements ClinicalCaseService {
                     valueFont));
             document.add(new Paragraph("Province: " + aCase.getProvinceName(), valueFont));
 
-            if (Boolean.TRUE.equals(aCase.getConsent())) {
+            if (aCase.getPatientMetadata() != null && !aCase.getPatientMetadata().isBlank()) {
                 document.add(new Paragraph("Patient Metadata: " + aCase.getPatientMetadata(), valueFont));
             }
 
@@ -246,7 +264,7 @@ public class ClinicalCaseServiceImpl implements ClinicalCaseService {
     }
 
     private void verifyOwner(Case aCase, User user) {
-        if (user.getRole() == Role.ADMIN)
+        if (user.getRole() == Role.ADMIN || user.getRole() == Role.DATA_USE)
             return;
         if (aCase.getUploadedBy() == null || !aCase.getUploadedBy().getId().equals(user.getId())) {
             throw new AccessDeniedException("User does not have access to this case");
@@ -256,13 +274,14 @@ public class ClinicalCaseServiceImpl implements ClinicalCaseService {
     private ClinicalCaseResponse toClinicalResponse(Case aCase) {
         return ClinicalCaseResponse.builder()
                 .id(aCase.getId())
+                .patientCode(aCase.getPatientCode())
                 .status(aCase.getStatus() != null ? aCase.getStatus().name() : null)
                 .analysisStatus(aCase.getAnalysisStatus() != null ? aCase.getAnalysisStatus().name() : null)
                 .imageId(aCase.getImage() != null ? aCase.getImage().getId() : null)
                 .provinceCode(aCase.getProvinceCode())
                 .provinceName(aCase.getProvinceName())
                 .consent(aCase.getConsent())
-                .patientMetadata(Boolean.TRUE.equals(aCase.getConsent()) ? aCase.getPatientMetadata() : null)
+                .patientMetadata(aCase.getPatientMetadata())
                 .createdAt(aCase.getCreatedAt())
                 .build();
     }
