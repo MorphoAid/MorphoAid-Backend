@@ -139,6 +139,7 @@ public class AuthController {
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
                 .role(user.getRole())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .build();
 
         return AuthResponse.builder()
@@ -169,6 +170,7 @@ public class AuthController {
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
                 .role(user.getRole())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .build();
 
         return ResponseEntity.ok(summary);

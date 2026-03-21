@@ -17,4 +17,5 @@ public class UserSummary {
     private String lastName;
     private String fullName;
     private Role role;
+    private String profilePictureUrl;
 }

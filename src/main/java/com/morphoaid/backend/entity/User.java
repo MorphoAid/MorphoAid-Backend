@@ -50,6 +50,9 @@ public class User implements UserDetails {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "profile_picture_url", length = 1024)
+    private String profilePictureUrl;
+
     @Column
     private String organization;
 
