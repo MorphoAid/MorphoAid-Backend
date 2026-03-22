@@ -4,6 +4,7 @@ import com.morphoaid.backend.dto.CaseResponse;
 import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.repository.UserRepository;
 import com.morphoaid.backend.service.CaseService;
+import com.morphoaid.backend.service.GeminiValidationService;
 import com.morphoaid.backend.service.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +26,15 @@ public class DataPrepCaseController {
     private final CaseService caseService;
     private final StorageService storageService;
     private final UserRepository userRepository;
+    private final GeminiValidationService geminiValidationService;
 
     @Autowired
     public DataPrepCaseController(CaseService caseService, StorageService storageService,
-            UserRepository userRepository) {
+            UserRepository userRepository, GeminiValidationService geminiValidationService) {
         this.caseService = caseService;
         this.storageService = storageService;
         this.userRepository = userRepository;
+        this.geminiValidationService = geminiValidationService;
     }
 
     @PostMapping
@@ -60,6 +63,12 @@ public class DataPrepCaseController {
         }
 
         try {
+            // Validate Image via Gemini API
+            GeminiValidationService.ValidationResult validationResult = geminiValidationService.validateImage(image.getBytes(), image.getContentType());
+            if (!validationResult.valid()) {
+                return ResponseEntity.badRequest().body(java.util.Map.of("message", validationResult.reason(), "type", "ImageValidationFailed"));
+            }
+
             // Save real image path temporarily for analyze demonstration
             java.io.File destDir = new java.io.File(System.getProperty("user.dir"), "debug");
             if (!destDir.exists())

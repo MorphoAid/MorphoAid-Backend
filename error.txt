@@ -1,0 +1,27 @@
+case.service.js:7  POST http://localhost:8081/cases 400 (Bad Request)
+dispatchXhrRequest @ axios.js?v=b17f57e1:1728
+xhr @ axios.js?v=b17f57e1:1605
+dispatchRequest @ axios.js?v=b17f57e1:2139
+Promise.then
+_request @ axios.js?v=b17f57e1:2349
+request @ axios.js?v=b17f57e1:2251
+httpMethod @ axios.js?v=b17f57e1:2395
+wrap @ axios.js?v=b17f57e1:8
+uploadCase @ case.service.js:7
+handleSubmit @ UploadImage.vue:316
+await in handleSubmit
+(anonymous) @ chunk-DGANQRCK.js?v=b17f57e1:12417
+callWithErrorHandling @ chunk-DGANQRCK.js?v=b17f57e1:2342
+callWithAsyncErrorHandling @ chunk-DGANQRCK.js?v=b17f57e1:2349
+invoker @ chunk-DGANQRCK.js?v=b17f57e1:11399
+UploadImage.vue:339 Upload error: AxiosError: Request failed with status code 400
+    at settle (axios.js?v=b17f57e1:1281:12)
+    at XMLHttpRequest.onloadend (axios.js?v=b17f57e1:1638:7)
+    at Axios.request (axios.js?v=b17f57e1:2255:41)
+    at async handleSubmit (UploadImage.vue:316:17)
+handleSubmit @ UploadImage.vue:339
+await in handleSubmit
+(anonymous) @ chunk-DGANQRCK.js?v=b17f57e1:12417
+callWithErrorHandling @ chunk-DGANQRCK.js?v=b17f57e1:2342
+callWithAsyncErrorHandling @ chunk-DGANQRCK.js?v=b17f57e1:2349
+invoker @ chunk-DGANQRCK.js?v=b17f57e1:11399
