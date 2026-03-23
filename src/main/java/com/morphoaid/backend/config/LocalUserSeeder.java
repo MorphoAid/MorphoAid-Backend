@@ -21,6 +21,8 @@ public class LocalUserSeeder {
                         .email("admin@test.com")
                         .password(passwordEncoder.encode("password"))
                         .role(Role.ADMIN)
+                        .firstName("Local")
+                        .lastName("Admin")
                         .fullName("Local Dev Admin")
                         .organization("MorphoAid Dev")
                         .build();

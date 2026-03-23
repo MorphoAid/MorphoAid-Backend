@@ -51,6 +51,8 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .email(adminEmail)
                                         .password(passwordEncoder.encode("Admin123!"))
                                         .role(Role.ADMIN)
+                                        .firstName("MorphoAid")
+                                        .lastName("Admin")
                                         .fullName("MorphoAid Admin")
                                         .username("admin")
                                         .organization("MorphoAid")
@@ -64,6 +66,8 @@ public class DevDataSeeder implements CommandLineRunner {
                         savedUser = userRepository.findByEmail(adminEmail).get();
                         // Fix for 401: ensure password is correct in dev
                         savedUser.setPassword(passwordEncoder.encode("Admin123!"));
+                        if (savedUser.getFirstName() == null) savedUser.setFirstName("MorphoAid");
+                        if (savedUser.getLastName() == null) savedUser.setLastName("Admin");
                         userRepository.save(savedUser);
                         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DevDataSeeder.class);
                         logger.info("Updated existing admin: {} (password: Admin123!)", adminEmail);
@@ -74,12 +78,19 @@ public class DevDataSeeder implements CommandLineRunner {
                                         .email(dataUseEmail)
                                         .password(passwordEncoder.encode("demopass"))
                                         .role(Role.DATA_USE)
+                                        .firstName("Demo")
+                                        .lastName("User")
                                         .fullName("Demo User")
                                         .username("demo")
                                         .organization("MorphoAid Demo")
                                         .build();
 
                         userRepository.save(dataUseUser);
+                } else {
+                        User existingDemo = userRepository.findByEmail(dataUseEmail).get();
+                        if (existingDemo.getFirstName() == null) existingDemo.setFirstName("Demo");
+                        if (existingDemo.getLastName() == null) existingDemo.setLastName("User");
+                        userRepository.save(existingDemo);
                 }
 
                 if (invitationTokenRepository.count() == 0) {

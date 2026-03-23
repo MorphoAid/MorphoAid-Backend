@@ -62,6 +62,10 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Builder.Default
+    private boolean approved = true;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
 
@@ -125,9 +127,57 @@ public class UserController {
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
                 .role(user.getRole())
-                .profilePictureUrl(user.getProfilePictureUrl())
+                .profilePictureUrl(buildProfilePictureUrl(user.getProfilePictureUrl(), user.getId()))
                 .build();
 
         return ResponseEntity.ok(summary);
+    }
+
+    private String buildProfilePictureUrl(String dbValue, Long userId) {
+        if (dbValue == null) return null;
+        if (dbValue.contains("via.placeholder.com")) return dbValue;
+        try {
+            return org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/users/{id}/profile-picture")
+                .buildAndExpand(userId)
+                .toUriString();
+        } catch(Exception e) {
+            return dbValue;
+        }
+    }
+
+    @GetMapping("/{id}/profile-picture")
+    public ResponseEntity<org.springframework.core.io.InputStreamResource> getProfilePicture(@PathVariable Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null || user.getProfilePictureUrl() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        String urlOrKey = user.getProfilePictureUrl();
+        String prefix = "https://" + bucket + ".s3." + region + ".amazonaws.com/";
+        String objectKey;
+        if (urlOrKey.startsWith(prefix)) {
+            objectKey = urlOrKey.substring(prefix.length());
+        } else if (urlOrKey.startsWith("http")) { 
+            return ResponseEntity.status(302).header("Location", urlOrKey).build();
+        } else {
+            objectKey = urlOrKey;
+        }
+
+        try {
+            GetObjectRequest getReq = GetObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(objectKey)
+                    .build();
+            software.amazon.awssdk.core.ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getReq);
+            org.springframework.core.io.InputStreamResource resource = new org.springframework.core.io.InputStreamResource(s3Object);
+            
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.parseMediaType(s3Object.response().contentType()))
+                    .body(resource);
+        } catch (Exception e) {
+            logger.error("Error fetching profile picture from S3", e);
+            return ResponseEntity.status(500).build();
+        }
     }
 }

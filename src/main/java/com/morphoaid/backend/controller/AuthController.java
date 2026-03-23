@@ -56,6 +56,7 @@ public class AuthController {
                 .lastName(request.getLastName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.DATA_USE)
+                .approved(false)  // New DATA_USE users need admin approval
                 .build();
 
         user = userRepository.save(user);
@@ -139,7 +140,8 @@ public class AuthController {
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
                 .role(user.getRole())
-                .profilePictureUrl(user.getProfilePictureUrl())
+                .profilePictureUrl(buildProfilePictureUrl(user.getProfilePictureUrl(), user.getId()))
+                .approved(user.isApproved())
                 .build();
 
         return AuthResponse.builder()
@@ -170,9 +172,23 @@ public class AuthController {
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
                 .role(user.getRole())
-                .profilePictureUrl(user.getProfilePictureUrl())
+                .profilePictureUrl(buildProfilePictureUrl(user.getProfilePictureUrl(), user.getId()))
+                .approved(user.isApproved())
                 .build();
 
         return ResponseEntity.ok(summary);
+    }
+    
+    private String buildProfilePictureUrl(String dbValue, Long userId) {
+        if (dbValue == null) return null;
+        if (dbValue.contains("via.placeholder.com")) return dbValue;
+        try {
+            return org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/users/{id}/profile-picture")
+                .buildAndExpand(userId)
+                .toUriString();
+        } catch(Exception e) {
+            return dbValue;
+        }
     }
 }

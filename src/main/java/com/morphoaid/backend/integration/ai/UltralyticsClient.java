@@ -13,6 +13,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.morphoaid.backend.service.SystemStatusService;
+
 import java.time.Duration;
 
 @Service
@@ -22,10 +24,12 @@ public class UltralyticsClient {
 
     private final RestTemplate restTemplate;
     private final UltralyticsProperties properties;
+    private final SystemStatusService systemStatusService;
 
     @Autowired
-    public UltralyticsClient(RestTemplateBuilder restTemplateBuilder, UltralyticsProperties properties) {
+    public UltralyticsClient(RestTemplateBuilder restTemplateBuilder, UltralyticsProperties properties, SystemStatusService systemStatusService) {
         this.properties = properties;
+        this.systemStatusService = systemStatusService;
         this.restTemplate = restTemplateBuilder
                 .rootUri(properties.getBaseUrl())
                 .setConnectTimeout(Duration.ofSeconds(10))
@@ -34,6 +38,11 @@ public class UltralyticsClient {
     }
 
     public String predict(byte[] imageBytes, String filename) {
+        if (!systemStatusService.isUltralyticsEnabled()) {
+            logger.warn("Ultralytics API is disabled by admin. Returning mock data.");
+            return "{\"images\": [{\"results\": [{\"class\": 3, \"confidence\": 0.98, \"box\": {\"x1\": 10, \"y1\": 10, \"x2\": 50, \"y2\": 50}}]}]}";
+        }
+
         if (properties.getApiKey() == null || properties.getApiKey().trim().isEmpty()
                 || "${ULTRALYTICS_API_KEY}".equals(properties.getApiKey())) {
             logger.info("Mocking AI response because API key is not configured or is a placeholder.");

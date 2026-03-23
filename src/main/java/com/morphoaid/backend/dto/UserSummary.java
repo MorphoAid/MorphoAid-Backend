@@ -18,4 +18,5 @@ public class UserSummary {
     private String fullName;
     private Role role;
     private String profilePictureUrl;
+    private boolean approved;
 }
