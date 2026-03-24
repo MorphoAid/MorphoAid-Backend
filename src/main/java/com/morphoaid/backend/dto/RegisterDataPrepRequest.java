@@ -12,11 +12,11 @@ public class RegisterDataPrepRequest {
     private String username;
 
     @NotBlank(message = "First name is required")
-    @Pattern(regexp = "^[A-Za-z]+$", message = "First name must contain only alphabetic characters")
+    @Pattern(regexp = "^[A-Za-z\\u0E00-\\u0E7F\\s]+$", message = "First name must contain only alphabetic characters and spaces")
     private String firstName;
 
     @NotBlank(message = "Last name is required")
-    @Pattern(regexp = "^[A-Za-z]+$", message = "Last name must contain only alphabetic characters")
+    @Pattern(regexp = "^[A-Za-z\\u0E00-\\u0E7F\\s]+$", message = "Last name must contain only alphabetic characters and spaces")
     private String lastName;
 
     @NotBlank(message = "Email is required")
