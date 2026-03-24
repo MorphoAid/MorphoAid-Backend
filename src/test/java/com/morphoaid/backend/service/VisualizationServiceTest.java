@@ -1,6 +1,5 @@
 package com.morphoaid.backend.service;
 
-import com.morphoaid.backend.constant.ProvinceConstant;
 import com.morphoaid.backend.dto.ProvinceDataDto;
 import com.morphoaid.backend.repository.CaseRepository;
 import org.junit.jupiter.api.Test;

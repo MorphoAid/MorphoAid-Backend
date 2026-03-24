@@ -16,7 +16,6 @@ import com.morphoaid.backend.entity.CaseStatus;
 import com.morphoaid.backend.entity.AIResult;
 import java.io.ByteArrayOutputStream;
 import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

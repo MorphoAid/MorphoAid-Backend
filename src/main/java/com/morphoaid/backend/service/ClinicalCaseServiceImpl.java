@@ -181,6 +181,32 @@ public class ClinicalCaseServiceImpl implements ClinicalCaseService {
     }
 
     @Override
+    @Transactional
+    public CaseNoteResponse updateNote(Long caseId, Long noteId, String note, User user) {
+        Case aCase = caseRepository.findById(caseId)
+                .orElseThrow(() -> new NotFoundException("Case not found"));
+
+        verifyOwner(aCase, user);
+
+        CaseNote caseNote = caseNoteRepository.findById(noteId)
+                .orElseThrow(() -> new NotFoundException("Note not found"));
+
+        if (!caseNote.getCaseEntity().getId().equals(caseId)) {
+            throw new IllegalArgumentException("Note does not belong to this case");
+        }
+
+        // Only author or admin can update note
+        if (user.getRole() != Role.ADMIN && !caseNote.getAuthor().getId().equals(user.getId())) {
+            throw new AccessDeniedException("User does not have permission to update this note");
+        }
+
+        caseNote.setNote(note);
+        caseNote = caseNoteRepository.save(caseNote);
+
+        return toNoteResponse(caseNote);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<CaseNoteResponse> getNotes(Long caseId, User currentUser) {
         Case aCase = caseRepository.findById(caseId)

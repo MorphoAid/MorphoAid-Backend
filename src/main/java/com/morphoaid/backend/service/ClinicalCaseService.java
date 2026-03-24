@@ -18,6 +18,8 @@ public interface ClinicalCaseService {
 
     CaseNoteResponse addNote(Long caseId, String note, User author);
 
+    CaseNoteResponse updateNote(Long caseId, Long noteId, String note, User user);
+
     List<CaseNoteResponse> getNotes(Long caseId, User currentUser);
 
     void exportPdf(Long caseId, OutputStream outputStream, User currentUser);

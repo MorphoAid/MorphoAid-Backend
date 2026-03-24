@@ -2,6 +2,7 @@ package com.morphoaid.backend.service;
 
 import com.morphoaid.backend.dto.AIResultResponse;
 import com.morphoaid.backend.dto.CaseResponse;
+import com.morphoaid.backend.dto.UserSummary;
 import com.morphoaid.backend.entity.AIResult;
 import com.morphoaid.backend.entity.Case;
 import com.morphoaid.backend.entity.CaseImage;
@@ -304,6 +305,21 @@ public class CaseService {
                 .imageFilename(image != null ? image.getOriginalFilename() : null)
                 .createdAt(entity.getCreatedAt())
                 .uploadedById(entity.getUploadedBy() != null ? entity.getUploadedBy().getId() : null)
+                .uploadedBy(entity.getUploadedBy() != null ? toUserSummary(entity.getUploadedBy()) : null)
+                .build();
+    }
+
+    private UserSummary toUserSummary(User user) {
+        if (user == null) return null;
+        return UserSummary.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .profilePictureUrl(user.getProfilePictureUrl())
+                .approved(user.isApproved())
                 .build();
     }
 

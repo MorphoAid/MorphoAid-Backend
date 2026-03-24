@@ -21,4 +21,5 @@ public class CaseResponse {
     private String imageFilename;
     private LocalDateTime createdAt;
     private Long uploadedById;
+    private UserSummary uploadedBy;
 }

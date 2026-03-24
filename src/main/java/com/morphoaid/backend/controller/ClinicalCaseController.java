@@ -135,6 +135,31 @@ public class ClinicalCaseController {
         return ResponseEntity.ok(clinicalCaseService.getNotes(id, currentUser));
     }
 
+    @PatchMapping("/cases/{id}/notes/{noteId}")
+    @PreAuthorize("hasRole('DATA_USE')")
+    public ResponseEntity<?> updateNote(
+            @PathVariable Long id,
+            @PathVariable Long noteId,
+            @RequestBody Map<String, String> body,
+            Principal principal) {
+        String note = body.get("note");
+        if (note == null || note.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Note content is required."));
+        }
+
+        try {
+            User currentUser = getCurrentUser(principal);
+            CaseNoteResponse response = clinicalCaseService.updateNote(id, noteId, note, currentUser);
+            return ResponseEntity.ok(Map.of("message", "Note updated successfully.", "data", response));
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error updating note {} for case {}", noteId, id, e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("message", "Error updating note. Please try again later."));
+        }
+    }
+
     @GetMapping("/cases/{id}/export")
     @PreAuthorize("hasRole('DATA_USE')")
     public ResponseEntity<byte[]> exportPdf(@PathVariable Long id, Principal principal) {

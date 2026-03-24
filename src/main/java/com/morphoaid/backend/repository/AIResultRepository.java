@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +18,13 @@ public interface AIResultRepository extends JpaRepository<AIResult, Long> {
     Optional<AIResult> findByCaseImageCaseEntityId(Long caseId);
 
     void deleteByCaseEntityId(Long caseId);
+
+    @Query("SELECT AVG(a.confidence) FROM AIResult a")
+    Double findAvgConfidence();
+
+    @Query("SELECT a.parasiteStage FROM AIResult a WHERE a.parasiteStage IS NOT NULL GROUP BY a.parasiteStage ORDER BY COUNT(a) DESC")
+    List<String> findStagesOrderByCountDesc();
+
+    @Query("SELECT a.parasiteStage, a.confidence, COUNT(a), a.drugType FROM AIResult a GROUP BY a.parasiteStage, a.confidence, a.drugType")
+    List<Object[]> findStageConfidenceDistribution();
 }
