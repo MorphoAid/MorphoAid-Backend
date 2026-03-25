@@ -45,12 +45,13 @@ public class CaseService {
     private final UltralyticsClient ultralyticsClient;
     private final UltralyticsParser ultralyticsParser;
     private final StorageService storageService;
+    private final ActivityService activityService;
 
     @Autowired
     public CaseService(CaseRepository caseRepository, UserRepository userRepository,
             AIResultRepository aiResultRepository, CaseImageRepository caseImageRepository,
             UltralyticsClient ultralyticsClient, UltralyticsParser ultralyticsParser,
-            StorageService storageService) {
+            StorageService storageService, ActivityService activityService) {
         this.caseRepository = caseRepository;
         this.userRepository = userRepository;
         this.aiResultRepository = aiResultRepository;
@@ -58,6 +59,7 @@ public class CaseService {
         this.ultralyticsClient = ultralyticsClient;
         this.ultralyticsParser = ultralyticsParser;
         this.storageService = storageService;
+        this.activityService = activityService;
     }
 
     @Transactional
@@ -84,6 +86,16 @@ public class CaseService {
 
         // 3. บันทึกข้อมูล
         Case savedCase = caseRepository.save(newCase);
+        
+        // Log Activity
+        activityService.log(
+            uploadedBy.getEmail(), 
+            uploadedBy.getRole(), 
+            "Case Upload", 
+            "Case #" + savedCase.getId(), 
+            "Success"
+        );
+        
         return toCaseResponse(savedCase);
     }
 
@@ -181,6 +193,15 @@ public class CaseService {
         targetCase.setAnalysisStatus(AnalysisStatus.COMPLETED);
         caseRepository.save(targetCase);
 
+        // Log Activity
+        activityService.log(
+            "system", 
+            Role.DATA_USE, // Mock role for system actions, or a special role if available
+            "AI Analysis", 
+            "Case #" + targetCase.getId(), 
+            "Success"
+        );
+
         return toAIResultResponse(aiResult);
     }
 
@@ -269,6 +290,11 @@ public class CaseService {
         // Delete the case (cascades to CaseImage and CaseNote)
         caseRepository.deleteById(caseId);
         logger.info("Deleted case with ID: {} by user: {}", caseId, userEmail);
+
+        // Log Activity (fetch user details first for role)
+        userRepository.findByEmail(userEmail).ifPresent(u -> 
+            activityService.log(userEmail, u.getRole(), "Case Deletion", "Case #" + caseId, "Success")
+        );
     }
 
     private CaseResponse toCaseResponse(Case entity) {

@@ -23,10 +23,12 @@ import java.util.stream.Collectors;
 public class AdminUserController {
 
     private final UserRepository userRepository;
+    private final com.morphoaid.backend.service.ActivityService activityService;
 
     @Autowired
-    public AdminUserController(UserRepository userRepository) {
+    public AdminUserController(UserRepository userRepository, com.morphoaid.backend.service.ActivityService activityService) {
         this.userRepository = userRepository;
+        this.activityService = activityService;
     }
 
     @GetMapping(value = "/users", produces = "application/json")
@@ -68,6 +70,15 @@ public class AdminUserController {
         user.setRole(request.getRole());
         userRepository.save(user);
 
+        // Log Activity
+        activityService.log(
+            principal.getName(), 
+            com.morphoaid.backend.entity.Role.ADMIN, 
+            "Role Update", 
+            "User " + user.getEmail() + " -> " + request.getRole(), 
+            "Success"
+        );
+
         AdminUserResponse response = AdminUserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -102,6 +113,16 @@ public class AdminUserController {
                 .map(user -> {
                     user.setApproved(true);
                     userRepository.save(user);
+                    
+                    // Log Activity
+                    activityService.log(
+                        "admin", // Principal could be used if available in method sig
+                        com.morphoaid.backend.entity.Role.ADMIN, 
+                        "User Approval", 
+                        "User " + user.getEmail(), 
+                        "Success"
+                    );
+                    
                     return ResponseEntity.ok(Map.of("message", "User approved", "id", id));
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -113,6 +134,16 @@ public class AdminUserController {
     public ResponseEntity<?> rejectUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) return ResponseEntity.notFound().build();
         userRepository.deleteById(id);
+        
+        // Log Activity
+        activityService.log(
+            "admin", 
+            com.morphoaid.backend.entity.Role.ADMIN, 
+            "User Deletion/Reject", 
+            "User ID #" + id, 
+            "Success"
+        );
+        
         return ResponseEntity.ok(Map.of("message", "User rejected and removed", "id", id));
     }
 }

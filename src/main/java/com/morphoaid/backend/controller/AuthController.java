@@ -23,14 +23,17 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final InvitationTokenService tokenService;
     private final com.morphoaid.backend.security.JwtService jwtService;
+    private final com.morphoaid.backend.service.ActivityService activityService;
 
     @Autowired
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            InvitationTokenService tokenService, com.morphoaid.backend.security.JwtService jwtService) {
+            InvitationTokenService tokenService, com.morphoaid.backend.security.JwtService jwtService,
+            com.morphoaid.backend.service.ActivityService activityService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
         this.jwtService = jwtService;
+        this.activityService = activityService;
     }
 
     @PostMapping("/register")
@@ -60,6 +63,15 @@ public class AuthController {
                 .build();
 
         user = userRepository.save(user);
+
+        // Log Activity
+        activityService.log(
+            user.getEmail(), 
+            user.getRole(), 
+            "User Registration", 
+            "Pending Approval", 
+            "Success"
+        );
 
         return ResponseEntity.status(201).body(buildDummyResponse(user));
     }
@@ -97,6 +109,15 @@ public class AuthController {
 
         user = userRepository.save(user);
         tokenService.markUsed(request.getInvitationToken(), user.getId());
+
+        // Log Activity
+        activityService.log(
+            user.getEmail(), 
+            user.getRole(), 
+            "User Registration", 
+            "Data Prep (Token Used)", 
+            "Success"
+        );
 
         return ResponseEntity.status(201).body(buildDummyResponse(user));
     }
