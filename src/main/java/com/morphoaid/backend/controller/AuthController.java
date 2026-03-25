@@ -76,6 +76,16 @@ public class AuthController {
         return ResponseEntity.status(201).body(buildDummyResponse(user));
     }
 
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            java.util.Map<String, String> response = new java.util.HashMap<>();
+            response.put("message", "This email already exists.");
+            return ResponseEntity.status(409).body(response);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/register/dataprep")
     public ResponseEntity<?> registerDataPrep(@RequestBody @Valid RegisterDataPrepRequest request) {
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
