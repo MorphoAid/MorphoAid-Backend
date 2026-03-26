@@ -29,7 +29,7 @@ public class LocalSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(
                         org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/register/dataprep",
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/register/dataprep", "/auth/check-email",
                                 "/visualization/**")
                         .permitAll()
                         .anyRequest().authenticated())
