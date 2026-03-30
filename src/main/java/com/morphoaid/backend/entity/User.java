@@ -66,6 +66,19 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean approved = true;
 
+    // Cascading relationships to support full user deletion (SRS-145)
+    @OneToMany(mappedBy = "uploadedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Case> uploadedCases = new java.util.ArrayList<>();
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CaseNote> notes = new java.util.ArrayList<>();
+
+    @OneToMany(mappedBy = "uploadedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CaseImage> uploadedImages = new java.util.ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
