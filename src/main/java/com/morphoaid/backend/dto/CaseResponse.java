@@ -8,11 +8,18 @@ import java.time.LocalDateTime;
 @Builder
 public class CaseResponse {
     private Long id;
-    private String patientCode;
+    private Long patientCode;
     private String technicianId;
     private String location;
+    private String provinceCode;
+    private String provinceName;
+    private String patientMetadata;
     private String status;
-    private String imagePath;
+    private String analysisStatus;
+    private String imagePath; // TODO: Expose a single CaseImage object when frontend allows
+    private Long imageId;
+    private String imageFilename;
     private LocalDateTime createdAt;
     private Long uploadedById;
+    private UserSummary uploadedBy;
 }

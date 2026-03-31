@@ -31,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Custom Logs ###
+run.log
+
+### Properties ###
+application.properties
+
+# Environment / Secrets - NEVER commit
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Debug artifacts
+debug/
+logs/
+*.tmp

@@ -22,7 +22,20 @@ public class AIResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    // @OneToOne
+    // @JoinColumn(name = "image_id", insertable = false, updatable = false)
+    // private CaseImage image;
+
+    /**
+     * The specific image that was analyzed.
+     * Mapped to `image_id` column in ai_results table (NOT NULL in live DB).
+     * Marked optional=true in JPA but must be supplied on insert.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id", nullable = true)
+    private CaseImage caseImage;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "case_id", nullable = false)
     private Case caseEntity;
 
@@ -31,6 +44,12 @@ public class AIResult {
 
     @Column(name = "drug_exposure")
     private Boolean drugExposure;
+
+    @Column(name = "drug_type")
+    private String drugType;
+
+    @Column(name = "top_class_id")
+    private Integer topClassId;
 
     @Column
     private Double confidence;

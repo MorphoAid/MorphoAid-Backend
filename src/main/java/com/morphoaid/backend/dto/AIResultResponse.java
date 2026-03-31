@@ -12,6 +12,8 @@ public class AIResultResponse {
     private String parasiteStage;
     private Boolean drugExposure;
     private Double confidence;
+    private String drugType;
+    private Integer topClassId;
     private String rawResponseJson;
     private LocalDateTime createdAt;
 }
