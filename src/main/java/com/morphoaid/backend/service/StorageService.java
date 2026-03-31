@@ -9,5 +9,9 @@ public interface StorageService {
 
     CaseImage uploadCaseImage(Long caseId, MultipartFile file, User uploader);
 
+    String uploadFile(MultipartFile file, String folder);
+    
+    InputStream downloadFile(String objectKey);
+
     InputStream downloadImageContent(Long caseId, Long imageId);
 }

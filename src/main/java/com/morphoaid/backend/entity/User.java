@@ -56,6 +56,18 @@ public class User implements UserDetails {
     @Column
     private String organization;
 
+    @Column
+    private String title;
+
+    @Column(name = "license_number")
+    private String licenseNumber;
+
+    @Column
+    private String hospital;
+
+    @Column(name = "verification_document_url", length = 1024)
+    private String verificationDocumentUrl;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

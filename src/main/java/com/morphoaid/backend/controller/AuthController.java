@@ -11,9 +11,11 @@ import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.repository.UserRepository;
 import com.morphoaid.backend.service.InvitationTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.morphoaid.backend.service.StorageService;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,20 +26,23 @@ public class AuthController {
     private final InvitationTokenService tokenService;
     private final com.morphoaid.backend.security.JwtService jwtService;
     private final com.morphoaid.backend.service.ActivityService activityService;
+    private final StorageService storageService;
 
     @Autowired
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
             InvitationTokenService tokenService, com.morphoaid.backend.security.JwtService jwtService,
-            com.morphoaid.backend.service.ActivityService activityService) {
+            com.morphoaid.backend.service.ActivityService activityService,
+            StorageService storageService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
         this.jwtService = jwtService;
         this.activityService = activityService;
+        this.storageService = storageService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterDataUseRequest request) {
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> register(@ModelAttribute @Valid RegisterDataUseRequest request) {
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
             request.setUsername("u" + java.util.UUID.randomUUID().toString().substring(0, 8));
         }
@@ -52,6 +57,12 @@ public class AuthController {
             return buildValidationError("username", "Username already in use");
         }
 
+        String verificationUrl = null;
+        if (request.getVerificationDocument() != null && !request.getVerificationDocument().isEmpty()) {
+            String folder = "verifications";
+            verificationUrl = storageService.uploadFile(request.getVerificationDocument(), folder);
+        }
+
         User user = User.builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
@@ -60,6 +71,10 @@ public class AuthController {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.DATA_USE)
                 .approved(false)  // New DATA_USE users need admin approval
+                .title(request.getTitle())
+                .licenseNumber(request.getLicenseNumber())
+                .hospital(request.getHospital())
+                .verificationDocumentUrl(verificationUrl)
                 .build();
 
         user = userRepository.save(user);

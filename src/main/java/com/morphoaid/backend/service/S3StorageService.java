@@ -175,6 +175,53 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public String uploadFile(MultipartFile file, String folder) {
+        // Validate MIME
+        List<String> validMimes = Arrays.asList(allowedMimes.split(","));
+        if (!validMimes.contains(file.getContentType())) {
+            throw new IllegalArgumentException("Invalid MIME type: " + file.getContentType());
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.lastIndexOf(".") > 0) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String objectKey = folder + "/" + UUID.randomUUID() + extension;
+
+        try {
+            if ("mock-access-key".equals(awsAccessKey)) {
+                logger.info("Mock S3 Upload (Generic) -> Bucket: {}, Key: {}", bucket, objectKey);
+            } else {
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(objectKey)
+                        .contentType(file.getContentType())
+                        .serverSideEncryption(ServerSideEncryption.AES256)
+                        .build();
+
+                s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
+                logger.info("SUCCESS: Generic file uploaded to S3 -> Key: {}", objectKey);
+            }
+            return objectKey;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file", e);
+        }
+    }
+
+    @Override
+    public InputStream downloadFile(String objectKey) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(objectKey)
+                .build();
+
+        ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest);
+        return s3Object;
+    }
+
+    @Override
     public InputStream downloadImageContent(Long caseId, Long imageId) {
         CaseImage image = caseImageRepository.findById(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("Image not found"));

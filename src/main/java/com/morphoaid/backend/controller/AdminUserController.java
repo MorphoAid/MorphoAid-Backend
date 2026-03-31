@@ -13,6 +13,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.morphoaid.backend.service.StorageService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import java.io.InputStream;
+
 
 import java.util.List;
 import java.util.Map;
@@ -24,11 +29,15 @@ public class AdminUserController {
 
     private final UserRepository userRepository;
     private final com.morphoaid.backend.service.ActivityService activityService;
+    private final StorageService storageService;
 
     @Autowired
-    public AdminUserController(UserRepository userRepository, com.morphoaid.backend.service.ActivityService activityService) {
+    public AdminUserController(UserRepository userRepository, 
+                               com.morphoaid.backend.service.ActivityService activityService,
+                               StorageService storageService) {
         this.userRepository = userRepository;
         this.activityService = activityService;
+        this.storageService = storageService;
     }
 
     @GetMapping(value = "/users", produces = "application/json")
@@ -36,12 +45,8 @@ public class AdminUserController {
     public ResponseEntity<List<AdminUserResponse>> getAllUsers() {
         List<User> users = userRepository.findAll();
         List<AdminUserResponse> response = users.stream()
-                .map(user -> AdminUserResponse.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .role(user.getRole())
-                        .createdAt(user.getCreatedAt())
-                        .build())
+                .map(this::mapToResponse)
+
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -79,12 +84,8 @@ public class AdminUserController {
             "Success"
         );
 
-        AdminUserResponse response = AdminUserResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .createdAt(user.getCreatedAt())
-                .build();
+        AdminUserResponse response = mapToResponse(user);
+
 
         return ResponseEntity.ok(response);
     }
@@ -95,12 +96,8 @@ public class AdminUserController {
     public ResponseEntity<List<AdminUserResponse>> getPendingUsers() {
         List<User> pending = userRepository.findByApproved(false);
         List<AdminUserResponse> response = pending.stream()
-                .map(user -> AdminUserResponse.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .role(user.getRole())
-                        .createdAt(user.getCreatedAt())
-                        .build())
+                .map(this::mapToResponse)
+
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -145,5 +142,64 @@ public class AdminUserController {
         );
         
         return ResponseEntity.ok(Map.of("message", "User rejected and removed", "id", id));
+    }
+
+    @GetMapping("/users/{id}/verification-document")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<InputStreamResource> getVerificationDocument(@PathVariable Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new com.morphoaid.backend.exception.NotFoundException("User not found"));
+
+        if (user.getVerificationDocumentUrl() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            InputStream is = storageService.downloadFile(user.getVerificationDocumentUrl());
+            
+            // Try to guess content type from filename or default to octet-stream
+            String contentType = "application/octet-stream";
+            String filename = user.getVerificationDocumentUrl();
+            if (filename.toLowerCase().endsWith(".pdf")) contentType = "application/pdf";
+            else if (filename.toLowerCase().endsWith(".jpg") || filename.toLowerCase().endsWith(".jpeg")) contentType = "image/jpeg";
+            else if (filename.toLowerCase().endsWith(".png")) contentType = "image/png";
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(new InputStreamResource(is));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    private AdminUserResponse mapToResponse(User user) {
+        return AdminUserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .fullName(user.getFullName())
+                .profilePictureUrl(user.getProfilePictureUrl())
+                .organization(user.getOrganization())
+                .title(user.getTitle())
+                .licenseNumber(user.getLicenseNumber())
+                .hospital(user.getHospital())
+                .verificationDocumentUrl(buildVerificationDocumentUrl(user.getVerificationDocumentUrl(), user.getId()))
+                .build();
+    }
+
+    private String buildVerificationDocumentUrl(String dbValue, Long userId) {
+        if (dbValue == null) return null;
+        if (dbValue.startsWith("http")) return dbValue;
+        try {
+            return org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/admin/users/{id}/verification-document")
+                .buildAndExpand(userId)
+                .toUriString();
+        } catch(Exception e) {
+            return dbValue;
+        }
     }
 }

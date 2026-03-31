@@ -109,7 +109,7 @@ public class CaseController {
             // Return latest DTO
             return ResponseEntity.ok(updatedCase);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
         } catch (Exception e) {
             logger.error("Error creating case: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(java.util.Map.of(

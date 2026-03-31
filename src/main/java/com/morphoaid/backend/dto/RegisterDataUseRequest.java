@@ -31,4 +31,10 @@ public class RegisterDataUseRequest {
 
     @AssertTrue(message = "You must agree to the terms")
     private boolean agreeTerms;
+
+    // Phase 2: Medical Identity Verification
+    private String title;
+    private String licenseNumber;
+    private String hospital;
+    private org.springframework.web.multipart.MultipartFile verificationDocument;
 }

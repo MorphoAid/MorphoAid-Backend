@@ -9,8 +9,9 @@ import com.morphoaid.backend.entity.Role;
 import com.morphoaid.backend.entity.User;
 import com.morphoaid.backend.repository.UserRepository;
 import com.morphoaid.backend.service.InvitationTokenService;
-import com.morphoaid.backend.service.ActivityService;
 import com.morphoaid.backend.security.JwtService;
+import com.morphoaid.backend.service.ActivityService;
+import com.morphoaid.backend.service.StorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -38,10 +39,13 @@ public class AuthenticationSystemUtc01ControllerTest {
     private InvitationTokenService tokenService;
 
     @Mock
+    private ActivityService activityService;
+
+    @Mock
     private JwtService jwtService;
 
     @Mock
-    private ActivityService activityService;
+    private StorageService storageService;
 
     @InjectMocks
     private AuthController authController;
@@ -59,6 +63,9 @@ public class AuthenticationSystemUtc01ControllerTest {
         request.setPassword("Password123");
         request.setConfirmPassword("Password123");
         request.setAgreeTerms(true);
+        request.setTitle("Dr.");
+        request.setLicenseNumber("MD-12345");
+        request.setHospital("Test Hospital");
         return request;
     }
 
@@ -75,6 +82,9 @@ public class AuthenticationSystemUtc01ControllerTest {
                 .email(request.getEmail())
                 .role(Role.DATA_USE)
                 .approved(false)
+                .title("Dr.")
+                .licenseNumber("MD-12345")
+                .hospital("Test Hospital")
                 .build();
         when(userRepository.save(any())).thenReturn(savedUser);
 
